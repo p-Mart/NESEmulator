@@ -30,5 +30,6 @@ int main(void){
     }));
     
     th.runAllTests();
+
     return 0;
 }

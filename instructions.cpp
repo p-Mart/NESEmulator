@@ -8,10 +8,10 @@
 using namespace std;
 
 // Add with Carry
-uint8_t ADC(uint8_t M){
+void ADC(uint8_t value){
 
     uint8_t prior_A = A;
-    A = A + M + getStatusBit(C);
+    A = A + value + getStatusBit(C);
 
     // Set processor status
     
@@ -31,26 +31,24 @@ uint8_t ADC(uint8_t M){
 
     // Overflow flag
     // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-    if (((prior_A ^ A) & (M ^ A) & 0x80) != 0x00){
+    if (((prior_A ^ A) & (value ^ A) & 0x80) != 0x00){
         setStatusBit(V);
     }else{
         clearStatusBit(V);
     }
 
     // Carry flag
-    if ((prior_A + M + getStatusBit(C)) > 0xff){
+    if ((prior_A + value + getStatusBit(C)) > 0xff){
         setStatusBit(C);
     }else{
         clearStatusBit(C);
     }
-
-    return A;
 }
 
-uint8_t AND(uint8_t M){
+void AND(uint8_t value){
 
     uint8_t prior_A = A;
-    A = A & M;
+    A = A & value;
 
     // Set processor status
     
@@ -67,11 +65,9 @@ uint8_t AND(uint8_t M){
     }else{
         clearStatusBit(Z);
     }
-
-    return A;
 }
 
-uint8_t ASL(uint8_t M){
+void ASL(){
 
     uint8_t prior_A = A;
     A = A << 1;
@@ -98,6 +94,8 @@ uint8_t ASL(uint8_t M){
     }else{
         clearStatusBit(C);
     }
+}
 
-    return A;
+void NOP(){
+    return; // Need to add cycle burn
 }
