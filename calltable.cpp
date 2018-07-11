@@ -1,260 +1,260 @@
 #include "instructions.h"
 
 void (* const opcodes[256])(void) = {
-    NOP,        // 0
-    NOP,        // 1
-    NOP,        // 2
-    NOP,        // 3
-    NOP,        // 4
-    NOP,        // 5
-    ASL_Z,        // 6
-    NOP,        // 7
-    NOP,        // 8
-    NOP,        // 9
-    ASL,        // 10
-    NOP,        // 11
-    NOP,        // 12
-    NOP,        // 13
-    ASL_A,        // 14
-    NOP,        // 15
-    NOP,        // 16
-    NOP,        // 17
-    NOP,        // 18
-    NOP,        // 19
-    NOP,        // 20
-    NOP,        // 21
-    ASL_ZX,        // 22
-    NOP,        // 23
-    NOP,        // 24
-    NOP,        // 25
-    NOP,        // 26
-    NOP,        // 27
-    NOP,        // 28
-    NOP,        // 29
-    ASL_AX,        // 30
-    NOP,        // 31
-    NOP,        // 32
-    AND_IX,        // 33
-    NOP,        // 34
-    NOP,        // 35
-    NOP,        // 36
-    AND_Z,        // 37
-    NOP,        // 38
-    NOP,        // 39
-    NOP,        // 40
-    AND_I,        // 41
-    NOP,        // 42
-    NOP,        // 43
-    NOP,        // 44
-    AND_A,        // 45
-    NOP,        // 46
-    NOP,        // 47
-    NOP,        // 48
-    AND_IY,        // 49
-    NOP,        // 50
-    NOP,        // 51
-    NOP,        // 52
-    AND_ZX,        // 53
-    NOP,        // 54
-    NOP,        // 55
-    NOP,        // 56
-    AND_AY,        // 57
-    NOP,        // 58
-    NOP,        // 59
-    NOP,        // 60
-    AND_AX,        // 61
-    NOP,        // 62
-    NOP,        // 63
-    NOP,        // 64
-    NOP,        // 65
-    NOP,        // 66
-    NOP,        // 67
-    NOP,        // 68
-    NOP,        // 69
-    NOP,        // 70
-    NOP,        // 71
-    NOP,        // 72
-    NOP,        // 73
-    NOP,        // 74
-    NOP,        // 75
-    NOP,        // 76
-    NOP,        // 77
-    NOP,        // 78
-    NOP,        // 79
-    NOP,        // 80
-    NOP,        // 81
-    NOP,        // 82
-    NOP,        // 83
-    NOP,        // 84
-    NOP,        // 85
-    NOP,        // 86
-    NOP,        // 87
-    NOP,        // 88
-    NOP,        // 89
-    NOP,        // 90
-    NOP,        // 91
-    NOP,        // 92
-    NOP,        // 93
-    NOP,        // 94
-    NOP,        // 95
-    NOP,        // 96
-    ADC_IX,        // 97
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    ADC_Z,        // 101
-    NOP,        // 102
-    NOP,        // 103
-    NOP,        // 104
-    ADC_I,        // 105
-    NOP,        // 106
-    NOP,        // 107
-    NOP,        // 108
-    ADC_A,        // 109
-    NOP,        // 110
-    NOP,        // 111
-    NOP,        // 112
-    ADC_IY,        // 113
-    NOP,        // 114
-    NOP,        // 115
-    NOP,        // 116
-    ADC_ZX,        // 117
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    ADC_AY,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    ADC_AX,        // 125
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP,        // 0
-    NOP         // 255
+    BRK,        // 0 (0x00)
+    ORA_IX,        // 1 (0x01)
+    NOP,        // 2 (0x02)
+    NOP,        // 3 (0x03)
+    NOP,        // 4 (0x04)
+    ORA_Z,        // 5 (0x05)
+    ASL_Z,        // 6 (0x06)
+    NOP,        // 7 (0x07)
+    PHP,        // 8 (0x08)
+    ORA_I,        // 9 (0x09)
+    ASL,        // 10 (0x0a)
+    NOP,        // 11 (0x0b)
+    NOP,        // 12 (0x0c)
+    ORA_A,        // 13 (0x0d)
+    ASL_A,        // 14 (0x0e)
+    NOP,        // 15 (0x0f)
+    BPL,        // 16 (0x10)
+    ORA_IY,        // 17 (0x11)
+    NOP,        // 18 (0x12)
+    NOP,        // 19 (0x13)
+    NOP,        // 20 (0x14)
+    ORA_ZX,        // 21 (0x15)
+    ASL_ZX,        // 22 (0x16)
+    NOP,        // 23 (0x17)
+    CLC,        // 24 (0x18)
+    ORA_AY,        // 25 (0x19)
+    NOP,        // 26 (0x1a)
+    NOP,        // 27 (0x1b)
+    NOP,        // 28 (0x1c)
+    ORA_AX,        // 29 (0x1d)
+    ASL_AX,        // 30 (0x1e)
+    NOP,        // 31 (0x1f)
+    JSR,        // 32 (0x20)
+    AND_IX,        // 33 (0x21)
+    NOP,        // 34 (0x22)
+    NOP,        // 35 (0x23)
+    BIT_Z,        // 36 (0x24)
+    AND_Z,        // 37 (0x25)
+    ROL_Z,        // 38 (0x26)
+    NOP,        // 39 (0x27)
+    PLP,        // 40 (0x28)
+    AND_I,        // 41 (0x29)
+    ROL,        // 42 (0x2a)
+    NOP,        // 43 (0x2b)
+    BIT_A,        // 44 (0x2c)
+    AND_A,        // 45 (0x2d)
+    ROL_A,        // 46 (0x2e)
+    NOP,        // 47 (0x2f)
+    BMI,        // 48 (0x30)
+    AND_IY,        // 49 (0x31)
+    NOP,        // 50 (0x32)
+    NOP,        // 51 (0x33)
+    NOP,        // 52 (0x34)
+    AND_ZX,        // 53 (0x35)
+    ROL_ZX,        // 54 (0x36)
+    NOP,        // 55 (0x37)
+    SEC,        // 56 (0x38)
+    AND_AY,        // 57 (0x39)
+    NOP,        // 58 (0x3a)
+    NOP,        // 59 (0x3b)
+    NOP,        // 60 (0x3c)
+    AND_AX,        // 61 (0x3d)
+    ROL_AX,        // 62 (0x3e)
+    NOP,        // 63 (0x3f)
+    RTI,        // 64 (0x40)
+    EOR_IX,        // 65 (0x41)
+    NOP,        // 66 (0x42)
+    NOP,        // 67 (0x43)
+    NOP,        // 68 (0x44)
+    EOR_Z,        // 69 (0x45)
+    LSR_Z,        // 70 (0x46)
+    NOP,        // 71 (0x47)
+    PHA,        // 72 (0x48)
+    EOR_I,        // 73 (0x49)
+    LSR,        // 74 (0x4a)
+    NOP,        // 75 (0x4b)
+    JMP_A,        // 76 (0x4c)
+    EOR_A,        // 77 (0x4d)
+    LSR_A,        // 78 (0x4e)
+    NOP,        // 79 (0x4f)
+    BVC,        // 80 (0x50)
+    EOR_IY,        // 81 (0x51)
+    NOP,        // 82 (0x52)
+    NOP,        // 83 (0x53)
+    NOP,        // 84 (0x54)
+    EOR_ZX,        // 85 (0x55)
+    LSR_ZX,        // 86 (0x56)
+    NOP,        // 87 (0x57)
+    CLI,        // 88 (0x58)
+    EOR_AY,        // 89 (0x59)
+    NOP,        // 90 (0x5a)
+    NOP,        // 91 (0x5b)
+    NOP,        // 92 (0x5c)
+    EOR_AX,        // 93 (0x5d)
+    LSR_AX,        // 94 (0x5e)
+    NOP,        // 95 (0x5f)
+    RTS,        // 96 (0x60)
+    ADC_IX,        // 97 (0x61)
+    NOP,        // 98 (0x62)
+    NOP,        // 99 (0x63)
+    NOP,        // 100 (0x64)
+    ADC_Z,        // 101 (0x65)
+    ROR_Z,        // 102 (0x66)
+    NOP,        // 103 (0x67)
+    PLA,        // 104 (0x68)
+    ADC_I,        // 105 (0x69)
+    ROR,        // 106 (0x6a)
+    NOP,        // 107 (0x6b)
+    JMP_I,        // 108 (0x6c)
+    ADC_A,        // 109 (0x6d)
+    ROR_A,        // 110 (0x6e)
+    NOP,        // 111 (0x6f)
+    BVS,        // 112 (0x70)
+    ADC_IY,        // 113 (0x71)
+    NOP,        // 114 (0x72)
+    NOP,        // 115 (0x73)
+    NOP,        // 116 (0x74)
+    ADC_ZX,        // 117 (0x75)
+    ROR_ZX,        // 118 (0x76)
+    NOP,        // 119 (0x77)
+    SEI,        // 120 (0x78)
+    ADC_AY,        // 121 (0x79)
+    NOP,        // 122 (0x7a)
+    NOP,        // 123 (0x7b)
+    NOP,        // 124 (0x7c)
+    ADC_AX,        // 125 (0x7d)
+    ROR_AX,        // 126 (0x7e)
+    NOP,        // 127 (0x7f)
+    NOP,        // 128 (0x80)
+    STA_IX,        // 129 (0x81)
+    NOP,        // 130 (0x82)
+    NOP,        // 131 (0x83)
+    STY_Z,        // 132 (0x84)
+    STA_Z,        // 133 (0x85)
+    STX_Z,        // 134 (0x86)
+    NOP,        // 135 (0x87)
+    DEY,        // 136 (0x88)
+    NOP,        // 137 (0x89)
+    TXA,        // 138 (0x8a)
+    NOP,        // 139 (0x8b)
+    STY_A,        // 140 (0x8c)
+    STA_A,        // 141 (0x8d)
+    STX_A,        // 142 (0x8e)
+    NOP,        // 143 (0x8f)
+    BCC,        // 144 (0x90)
+    STA_IY,        // 145 (0x91)
+    NOP,        // 146 (0x92)
+    NOP,        // 147 (0x93)
+    STY_ZX,        // 148 (0x94)
+    STA_ZX,        // 149 (0x95)
+    STX_ZY,        // 150 (0x96)
+    NOP,        // 151 (0x97)
+    TYA,        // 152 (0x98)
+    STA_AY,        // 153 (0x99)
+    TXS,        // 154 (0x9a)
+    NOP,        // 155 (0x9b)
+    NOP,        // 156 (0x9c)
+    STA_AX,        // 157 (0x9d)
+    NOP,        // 158 (0x9e)
+    NOP,        // 159 (0x9f)
+    LDY_I,        // 160 (0xa0)
+    LDA_IX,        // 161 (0xa1)
+    LDX_I,        // 162 (0xa2)
+    NOP,        // 163 (0xa3)
+    LDY_Z,        // 164 (0xa4)
+    LDA_Z,        // 165 (0xa5)
+    LDX_Z,        // 166 (0xa6)
+    NOP,        // 167 (0xa7)
+    TAY,        // 168 (0xa8)
+    LDA_I,        // 169 (0xa9)
+    TAX,        // 170 (0xaa)
+    NOP,        // 171 (0xab)
+    LDY_A,        // 172 (0xac)
+    LDA_A,        // 173 (0xad)
+    LDX_A,        // 174 (0xae)
+    NOP,        // 175 (0xaf)
+    BCS,        // 176 (0xb0)
+    LDA_IY,        // 177 (0xb1)
+    NOP,        // 178 (0xb2)
+    NOP,        // 179 (0xb3)
+    LDY_ZX,        // 180 (0xb4)
+    LDA_ZX,        // 181 (0xb5)
+    LDX_ZY,        // 182 (0xb6)
+    NOP,        // 183 (0xb7)
+    CLV,        // 184 (0xb8)
+    LDA_AY,        // 185 (0xb9)
+    TSX,        // 186 (0xba)
+    NOP,        // 187 (0xbb)
+    LDY_AX,        // 188 (0xbc)
+    LDA_AX,        // 189 (0xbd)
+    LDX_AY,        // 190 (0xbe)
+    NOP,        // 191 (0xbf)
+    CPY_I,        // 192 (0xc0)
+    CMP_IX,        // 193 (0xc1)
+    NOP,        // 194 (0xc2)
+    NOP,        // 195 (0xc3)
+    CPY_Z,        // 196 (0xc4)
+    CMP_Z,        // 197 (0xc5)
+    DEC_Z,        // 198 (0xc6)
+    NOP,        // 199 (0xc7)
+    INY,        // 200 (0xc8)
+    CMP_I,        // 201 (0xc9)
+    DEX,        // 202 (0xca)
+    NOP,        // 203 (0xcb)
+    CPY_A,        // 204 (0xcc)
+    CMP_A,        // 205 (0xcd)
+    DEC_A,        // 206 (0xce)
+    NOP,        // 207 (0xcf)
+    BNE,        // 208 (0xd0)
+    CMP_IY,        // 209 (0xd1)
+    NOP,        // 210 (0xd2)
+    NOP,        // 211 (0xd3)
+    NOP,        // 212 (0xd4)
+    CMP_ZX,        // 213 (0xd5)
+    DEC_ZX,        // 214 (0xd6)
+    NOP,        // 215 (0xd7)
+    CLD,        // 216 (0xd8)
+    CMP_AY,        // 217 (0xd9)
+    NOP,        // 218 (0xda)
+    NOP,        // 219 (0xdb)
+    NOP,        // 220 (0xdc)
+    CMP_AX,        // 221 (0xdd)
+    DEC_AX,        // 222 (0xde)
+    NOP,        // 223 (0xdf)
+    CPX_I,        // 224 (0xe0)
+    SBC_IX,        // 225 (0xe1)
+    NOP,        // 226 (0xe2)
+    NOP,        // 227 (0xe3)
+    CPX_Z,        // 228 (0xe4)
+    SBC_Z,        // 229 (0xe5)
+    INC_Z,        // 230 (0xe6)
+    NOP,        // 231 (0xe7)
+    INX,        // 232 (0xe8)
+    SBC_I,        // 233 (0xe9)
+    NOP,        // 234 (0xea)
+    NOP,        // 235 (0xeb)
+    CPX_A,        // 236 (0xec)
+    SBC_A,        // 237 (0xed)
+    INC_A,        // 238 (0xee)
+    NOP,        // 239 (0xef)
+    BEQ,        // 240 (0xf0)
+    SBC_IY,        // 241 (0xf1)
+    NOP,        // 242 (0xf2)
+    NOP,        // 243 (0xf3)
+    NOP,        // 244 (0xf4)
+    SBC_ZX,        // 245 (0xf5)
+    INC_ZX,        // 246 (0xf6)
+    NOP,        // 247 (0xf7)
+    SED,        // 248 (0xf8)
+    SBC_AY,        // 249 (0xf9)
+    NOP,        // 250 (0xfa)
+    NOP,        // 251 (0xfb)
+    NOP,        // 252 (0xfc)
+    SBC_AX,        // 253 (0xfd)
+    INC_AX,        // 254 (0xfe)
+    NOP         // 255 (0xff)
 };
