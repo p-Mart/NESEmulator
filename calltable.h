@@ -1,5 +1,8 @@
-#include "instructions.h"
+#ifndef CALLTABLE_H
+#define CALLTABLE_H
 
+#include "instructions.h"
+#include <cstdint>
 void (* const opcodes[256])(void) = {
     BRK,        // 0 (0x00)
     ORA_IX,        // 1 (0x01)
@@ -258,3 +261,5 @@ void (* const opcodes[256])(void) = {
     INC_AX,        // 254 (0xfe)
     NOP         // 255 (0xff)
 };
+
+#endif

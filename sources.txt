@@ -1,0 +1,11 @@
+NES Architecture Overview
+http://nesdev.com/NESDoc.pdf
+
+6502 Opcodes and Reference:
+http://obelisk.me.uk/6502/reference.html
+
+NES ASM Header info (and other stuff?)
+https://github.com/thentenaar/nesasm/blob/master/documentation/neshdr20.txt
+
+NES ROM Anatomy
+https://sadistech.com/nesromtool/romdoc.html

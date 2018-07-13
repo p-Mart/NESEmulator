@@ -1,8 +1,11 @@
 #include "TestHarness.h"
 #include "CPU.h"
 #include "instructions.h"
+#include "calltable.h"
 
+#include <fstream>
 #include <string>
+#include <cstdlib>
 #include <iostream>
 
 using namespace std;
@@ -10,25 +13,32 @@ using namespace std;
 int main(void){
 
     TestHarness th;
+    CPU* cpu = CPU::getInstance();
+    cpu->printRegisters();
 
-    th.registerTest(new UnitTest("Sanity test", [&th] (){
+    
+    
+    th.registerTest(new UnitTest("Sanity test", [&] (){
         return th.checkEqual("1 is equal to 1", 1, 1);
     }));
     
-    th.registerTest(new UnitTest("ADC Tests", [&th] (){
-        initializeRegisters();
-        ADC(127);
-        th.checkEqual("0+127 = 127", A, 127);
-        th.checkEqual("P is 0x00", P, 0x00);
-        ADC(2);
-        th.checkEqual("2+127 = 129", A, 129);
-        th.checkEqual("P is 0xC0", P, 0xC0);
-        ADC(200);
-        th.checkEqual("129 + 200 = 73 (overflow)", A, 0x49);
-        th.checkEqual("P is 0x41", P, 0x41);
-        return 1;
+
+    th.registerTest(new UnitTest("Test Program", [&] (){
+        cpu->clearRegisters();
+        cpu->loadProgram("test_program.nes");
+        cpu->runProgram();
+
+        return th.checkEqual("A is 16", cpu->A, 16);
     }));
-    
+
+    th.registerTest(new UnitTest("Test Program 2", [&] (){
+        cpu->clearRegisters();
+        cpu->loadProgram("test_program_2.nes");
+        cpu->runProgram();
+
+        return th.checkEqual("A is 16", cpu->A, 16);
+    }));
+
     th.runAllTests();
 
     return 0;

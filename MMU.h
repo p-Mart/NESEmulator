@@ -34,14 +34,17 @@ class MMU{
     static MMU *instance;
 
     // Internal 16-bit addressable memory
-    uint8_t *memory[MEMORY_SIZE];
+    uint8_t memory[MEMORY_SIZE];
 
     MMU(){};
 
    public:
         static MMU* getInstance();
-        uint8_t *read(uint16_t);
-        void write(uint16_t, uint8_t*);
+        uint8_t *read(uint16_t*);
+        uint8_t *read(uint8_t*);
+
+        void write(uint16_t*, uint8_t*);
+        void write(uint8_t*, uint8_t*);
 };
 
 #endif

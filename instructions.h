@@ -19,65 +19,65 @@
 // or it is the base behavior for the function
 
 // ADC - Add with Carry
-void ADC(uint16_t);
-void ADC_I(uint8_t);
-void ADC_Z(uint8_t);
-void ADC_ZX(uint8_t);
-void ADC_A(uint16_t);
-void ADC_AX(uint16_t);
-void ADC_AY(uint16_t);
-void ADC_IX(uint8_t);
-void ADC_IY(uint8_t);
+void ADC(uint8_t*);
+void ADC_I();
+void ADC_Z();
+void ADC_ZX();
+void ADC_A();
+void ADC_AX();
+void ADC_AY();
+void ADC_IX();
+void ADC_IY();
 
 // AND - Logical AND
-void AND(uint16_t);
-void AND_I(uint8_t);
-void AND_Z(uint8_t);
-void AND_ZX(uint8_t);
-void AND_A(uint16_t);
-void AND_AX(uint16_t);
-void AND_AY(uint16_t);
-void AND_IX(uint8_t);
-void AND_IY(uint8_t);
+void AND();
+void AND_I();
+void AND_Z();
+void AND_ZX();
+void AND_A();
+void AND_AX();
+void AND_AY();
+void AND_IX();
+void AND_IY();
 
 // ASL - Arithmetic Shift Left
 void ASL();
-void ASL_Z(uint8_t);
-void ASL_ZX(uint8_t);
-void ASL_A(uint16_t);
-void ASL_AX(uint16_t);
+void ASL_Z();
+void ASL_ZX();
+void ASL_A();
+void ASL_AX();
 
 // BCC - Branch if Carry Clear
-void BCC(uint8_t);
+void BCC();
 
 // BCS - Branch if Carry Set
-void BCS(uint8_t);
+void BCS();
 
 // BEQ - Branch if Equal
-void BEQ(uint8_t);
+void BEQ();
 
 // BIT - Bit Test
-void BIT(uint16_t);
-void BIT_Z(uint8_t);
-void BIT_A(uint16_t);
+void BIT();
+void BIT_Z();
+void BIT_A();
 
 // BMI - Branch if Minus
-void BMI(uint8_t);
+void BMI();
 
 // BNE - Branch if Not Equal
-void BNE(uint8_t);
+void BNE();
 
 // BPL - Branch if Positive
-void BPL(uint8_t);
+void BPL();
 
 // BRK - Force Interrupt
 void BRK();
 
 // BVC - Branch if Overflow Clear
-void BVC(uint8_t);
+void BVC();
 
 // BVS - Branch if Overflow Set
-void BVS(uint8_t);
+void BVS();
 
 // CLC - Clear Carry Flag
 void CLC();
@@ -92,34 +92,34 @@ void CLI();
 void CLV();
 
 // CMP - Compare
-void CMP(uint16_t);
-void CMP_I(uint8_t);
-void CMP_Z(uint8_t);
-void CMP_ZX(uint8_t);
-void CMP_A(uint16_t);
-void CMP_AX(uint16_t);
-void CMP_AY(uint16_t);
-void CMP_IX(uint8_t);
-void CMP_IY(uint8_t);
+void CMP();
+void CMP_I();
+void CMP_Z();
+void CMP_ZX();
+void CMP_A();
+void CMP_AX();
+void CMP_AY();
+void CMP_IX();
+void CMP_IY();
 
 // CPX - Compare X Register
-void CPX(uint16_t);
-void CPX_I(uint8_t);
-void CPX_Z(uint8_t);
-void CPX_A(uint16_t);
+void CPX();
+void CPX_I();
+void CPX_Z();
+void CPX_A();
 
 // CPY - Compare Y Register
-void CPY(uint16_t);
-void CPY_I(uint8_t);
-void CPY_Z(uint8_t);
-void CPY_A(uint16_t);
+void CPY();
+void CPY_I();
+void CPY_Z();
+void CPY_A();
 
 // DEC - Decrement Memory
-void DEC(uint16_t);
-void DEC_Z(uint8_t);
-void DEC_ZX(uint8_t);
-void DEC_A(uint16_t);
-void DEC_AX(uint16_t);
+void DEC();
+void DEC_Z();
+void DEC_ZX();
+void DEC_A();
+void DEC_AX();
 
 // DEX - Decrement X Register
 void DEX();
@@ -128,22 +128,22 @@ void DEX();
 void DEY();
 
 // EOR - Exclusive OR
-void EOR(uint16_t);
-void EOR_I(uint8_t);
-void EOR_Z(uint8_t);
-void EOR_ZX(uint8_t);
-void EOR_A(uint16_t);
-void EOR_AX(uint16_t);
-void EOR_AY(uint16_t);
-void EOR_IX(uint8_t);
-void EOR_IY(uint8_t);
+void EOR();
+void EOR_I();
+void EOR_Z();
+void EOR_ZX();
+void EOR_A();
+void EOR_AX();
+void EOR_AY();
+void EOR_IX();
+void EOR_IY();
 
 // INC - Increment Memory
-void INC(uint16_t);
-void INC_Z(uint8_t);
-void INC_ZX(uint8_t);
-void INC_A(uint16_t);
-void INC_AX(uint16_t);
+void INC();
+void INC_Z();
+void INC_ZX();
+void INC_A();
+void INC_AX();
 
 // INX - Increment X Register
 void INX();
@@ -152,60 +152,60 @@ void INX();
 void INY();
 
 // JMP - Jump
-void JMP(uint16_t);
-void JMP_A(uint16_t);
-void JMP_I(uint16_t); // NOTE: This is for INDIRECT addressing (only JMP does this)
+void JMP();
+void JMP_A();
+void JMP_I(); // NOTE: This is for INDIRECT addressing (only JMP does this)
 
 // JSR - Jump to Subroutine
-void JSR(uint16_t); // Absolute addressing only
+void JSR(); // Absolute addressing only
 
 // LDA - Load Accumulator
-void LDA(uint16_t);
-void LDA_I(uint8_t);
-void LDA_Z(uint8_t);
-void LDA_ZX(uint8_t);
-void LDA_A(uint16_t);
-void LDA_AX(uint16_t);
-void LDA_AY(uint16_t);
-void LDA_IX(uint8_t);
-void LDA_IY(uint8_t);
+void LDA();
+void LDA_I();
+void LDA_Z();
+void LDA_ZX();
+void LDA_A();
+void LDA_AX();
+void LDA_AY();
+void LDA_IX();
+void LDA_IY();
 
 // LDX - Load X Register
-void LDX(uint16_t);
-void LDX_I(uint8_t);
-void LDX_Z(uint8_t);
-void LDX_ZY(uint8_t); 
-void LDX_A(uint16_t);
-void LDX_AY(uint16_t);
+void LDX();
+void LDX_I();
+void LDX_Z();
+void LDX_ZY(); 
+void LDX_A();
+void LDX_AY();
 
 // LDY - Load Y Register
-void LDY(uint16_t);
-void LDY_I(uint8_t);
-void LDY_Z(uint8_t);
-void LDY_ZX(uint8_t); 
-void LDY_A(uint16_t);
-void LDY_AX(uint16_t);
+void LDY();
+void LDY_I();
+void LDY_Z();
+void LDY_ZX(); 
+void LDY_A();
+void LDY_AX();
 
 // LSR - Logical Shift Right
 void LSR();
-void LSR_Z(uint8_t);
-void LSR_ZX(uint8_t);
-void LSR_A(uint16_t);
-void LSR_AX(uint16_t);
+void LSR_Z();
+void LSR_ZX();
+void LSR_A();
+void LSR_AX();
 
 // NOP - No Operation
 void NOP();
 
 // ORA - Logical Inclusive OR
-void ORA(uint16_t);
-void ORA_I(uint8_t);
-void ORA_Z(uint8_t);
-void ORA_ZX(uint8_t);
-void ORA_A(uint16_t);
-void ORA_AX(uint16_t);
-void ORA_AY(uint16_t);
-void ORA_IX(uint8_t);
-void ORA_IY(uint8_t);
+void ORA();
+void ORA_I();
+void ORA_Z();
+void ORA_ZX();
+void ORA_A();
+void ORA_AX();
+void ORA_AY();
+void ORA_IX();
+void ORA_IY();
 
 // PHA - Push Accumulator
 void PHA();
@@ -213,22 +213,25 @@ void PHA();
 // PHP - Push Processor Status
 void PHP();
 
+// PLA - Pull Accumulator
+void PLA();
+
 // PLP - Pull Processor Status
 void PLP();
 
 // ROL - Rotate Left
 void ROL();
-void ROL_Z(uint8_t);
-void ROL_ZX(uint8_t);
-void ROL_A(uint16_t);
-void ROL_AX(uint16_t);
+void ROL_Z();
+void ROL_ZX();
+void ROL_A();
+void ROL_AX();
 
 // ROR - Rotate Right
 void ROR();
-void ROR_Z(uint8_t);
-void ROR_ZX(uint8_t);
-void ROR_A(uint16_t);
-void ROR_AX(uint16_t);
+void ROR_Z();
+void ROR_ZX();
+void ROR_A();
+void ROR_AX();
 
 // RTI - Return from Interrupt
 void RTI();
@@ -237,15 +240,15 @@ void RTI();
 void RTS();
 
 // SBC - Subtract with Carry
-void SBC(uint16_t);
-void SBC_I(uint8_t);
-void SBC_Z(uint8_t);
-void SBC_ZX(uint8_t);
-void SBC_A(uint16_t);
-void SBC_AX(uint16_t);
-void SBC_AY(uint16_t);
-void SBC_IX(uint8_t);
-void SBC_IY(uint8_t);
+void SBC();
+void SBC_I();
+void SBC_Z();
+void SBC_ZX();
+void SBC_A();
+void SBC_AX();
+void SBC_AY();
+void SBC_IX();
+void SBC_IY();
 
 // SEC - Set Carry Flag
 void SEC();
@@ -257,26 +260,26 @@ void SED();
 void SEI();
 
 // STA - Store Accumulator
-void STA(uint16_t);
-void STA_Z(uint8_t);
-void STA_ZX(uint8_t);
-void STA_A(uint16_t);
-void STA_AX(uint16_t);
-void STA_AY(uint16_t);
-void STA_IX(uint8_t);
-void STA_IY(uint8_t);
+void STA(uint16_t*);
+void STA_Z();
+void STA_ZX();
+void STA_A();
+void STA_AX();
+void STA_AY();
+void STA_IX();
+void STA_IY();
 
 // STX - Store X Register
-void STX(uint16_t);
-void STX_Z(uint8_t);
-void STX_ZY(uint8_t);
-void STX_A(uint16_t);
+void STX();
+void STX_Z();
+void STX_ZY();
+void STX_A();
 
 // STY - Store Y Register
-void STY(uint16_t);
-void STY_Z(uint8_t);
-void STY_ZX(uint8_t);
-void STY_A(uint16_t);
+void STY();
+void STY_Z();
+void STY_ZX();
+void STY_A();
 
 // TAX - Transfer Accumulator to X
 void TAX();
