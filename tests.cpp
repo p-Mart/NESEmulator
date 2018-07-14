@@ -36,7 +36,7 @@ int main(void){
         cpu->loadProgram("test_program_2.nes");
         cpu->runProgram();
 
-        return th.checkEqual("A is 16", cpu->A, 16);
+        return th.checkEqual("A is 255", cpu->A, 16);
     }));
 
     th.runAllTests();

@@ -47,6 +47,9 @@ void ASL_ZX();
 void ASL_A();
 void ASL_AX();
 
+// Branch base functionality
+void BRANCH(uint8_t*);
+
 // BCC - Branch if Carry Clear
 void BCC();
 

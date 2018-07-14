@@ -112,30 +112,88 @@ void ADC(uint8_t *value){
         cpu->clearStatusBit(C);
     }
 }
-
-void ADC(){}
 void ADC_I(){
     uint8_t *value;
     value = cpu->nextByte();
 
     ADC(value);
 }
-
 void ADC_Z(){
-    uint8_t *address;
+    uint8_t address;
     uint8_t *value;
-    address = cpu->nextByte();
-    value = mmu->read(address);
+    address = *cpu->nextByte();
+    value = mmu->read(&address);
 
     ADC(value);
 }
+void ADC_ZX(){
+    uint8_t address = 0;
+    uint8_t *value;
+    address += *cpu->nextByte();
+    address += cpu->X;
+    value = mmu->read(&address);
 
-void ADC_ZX(){}
-void ADC_A(){}
-void ADC_AX(){}
-void ADC_AY(){}
-void ADC_IX(){}
-void ADC_IY(){}
+    ADC(value);
+}
+void ADC_A(){
+
+    uint16_t address = 0;
+    uint8_t *value;
+
+    address += *cpu->nextByte();
+    address += *cpu->nextByte() * 16;
+    value = mmu->read(&address);
+
+    ADC(value);
+}
+void ADC_AX(){
+    uint16_t address = 0;
+    uint8_t *value;
+    address += *cpu->nextByte();
+    address += *cpu->nextByte() * 16;
+    address += cpu->X;
+    value = mmu->read(&address);
+
+    ADC(value);
+}
+void ADC_AY(){
+    uint16_t address = 0;
+    uint8_t *value;
+    address += *cpu->nextByte();
+    address += *cpu->nextByte() * 16;
+    address += cpu->Y;
+    value = mmu->read(&address);
+
+    ADC(value);
+}
+void ADC_IX(){
+    uint8_t indirect_address = 0;
+    uint16_t target_address = 0;
+    uint8_t *value;
+
+    indirect_address += *cpu->nextByte();
+    indirect_address += cpu->X;
+    target_address += *mmu->read(&indirect_address);
+    indirect_address++;
+    target_address += *mmu->read(&indirect_address) * 16;
+    value = mmu->read(&target_address);
+
+    ADC(value);
+}
+void ADC_IY(){
+    uint8_t indirect_address = 0;
+    uint16_t target_address = 0;
+    uint8_t *value;
+
+    indirect_address += *cpu->nextByte();
+    target_address += *mmu->read(&indirect_address);
+    indirect_address++;
+    target_address += *mmu->read(&indirect_address) * 16;
+    target_address += cpu->Y;
+    value = mmu->read(&target_address);
+
+    ADC(value);
+}
 
 // AND - Logical AND
 void AND(){}
@@ -182,14 +240,42 @@ void ASL_ZX(){}
 void ASL_A(){}
 void ASL_AX(){}
 
+void BRANCH(int8_t* offset){
+    cpu->PC = cpu->PC + *offset;
+}
+
 // BCC - Branch if Carry Clear
-void BCC(){}
+void BCC(){
+
+    int8_t offset = 0;
+    offset += *cpu->nextByte();
+    
+    if(cpu->getStatusBit(C) == 0){
+        BRANCH(&offset);
+    }
+}
 
 // BCS - Branch if Carry Set
-void BCS(){}
+void BCS(){
+
+    int8_t offset = 0;
+    offset += *cpu->nextByte();
+    
+    if(cpu->getStatusBit(C) == 1){
+        BRANCH(&offset);
+    }
+}
 
 // BEQ - Branch if Equal
-void BEQ(){}
+void BEQ(){
+
+    int8_t offset = 0;
+    offset += *cpu->nextByte();
+    
+    if(cpu->getStatusBit(Z) == 1){
+        BRANCH(&offset);
+    }
+}
 
 // BIT - Bit Test
 void BIT(){}
@@ -197,22 +283,62 @@ void BIT_Z(){}
 void BIT_A(){}
 
 // BMI - Branch if Minus
-void BMI(){}
+void BMI(){
+
+    int8_t offset = 0;
+    offset += *cpu->nextByte();
+    
+    if(cpu->getStatusBit(N) == 1){
+        BRANCH(&offset);
+    }
+}
 
 // BNE - Branch if Not Equal
-void BNE(){}
+void BNE(){
+
+    int8_t offset = 0;
+    offset += *cpu->nextByte();
+    
+    if(cpu->getStatusBit(Z) == 0){
+        BRANCH(&offset);
+    }
+}
 
 // BPL - Branch if Positive
-void BPL(){}
+void BPL(){
+
+    int8_t offset = 0;
+    offset += *cpu->nextByte();
+    
+    if(cpu->getStatusBit(N) == 0){
+        BRANCH(&offset);
+    }
+}
 
 // BRK - Force Interrupt
 void BRK(){}
 
 // BVC - Branch if Overflow Clear
-void BVC(){}
+void BVC(){
+
+    int8_t offset = 0;
+    offset += *cpu->nextByte();
+    
+    if(cpu->getStatusBit(V) == 0){
+        BRANCH(&offset);
+    }
+}
 
 // BVS - Branch if Overflow Set
-void BVS(){}
+void BVS(){
+
+    int8_t offset = 0;
+    offset += *cpu->nextByte();
+    
+    if(cpu->getStatusBit(V) == 1){
+        BRANCH(&offset);
+    }
+}
 
 // CLC - Clear Carry Flag
 void CLC(){
@@ -411,13 +537,19 @@ void SBC_IX(){}
 void SBC_IY(){}
 
 // SEC - Set Carry Flag
-void SEC(){}
+void SEC(){
+    cpu->setStatusBit(C);
+}
 
 // SED - Set Decimal Flag
-void SED(){}
+void SED(){
+    cpu->setStatusBit(D);
+}
 
 // SEI - Set Interrupt Disable
-void SEI(){}
+void SEI(){
+    cpu->setStatusBit(I);
+}
 
 // STA - Store Accumulator
 void STA(uint16_t *address){
