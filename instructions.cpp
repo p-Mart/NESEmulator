@@ -5,11 +5,115 @@
 #include <string>
 #include <bitset>
 #include <iostream>
+#include <functional>
 
 using namespace std;
 
+// Get singleton instances
 CPU* cpu = CPU::getInstance();
 MMU* mmu = MMU::getInstance();
+
+// Addressing mode wrappers
+
+// Immediate addressing - take a 1 Byte constant
+// at the next byte in the program and pass that
+// to the calling instruction
+void immediate(std::function<void (uint8_t*)> f){
+
+    uint8_t* value = cpu->nextByte();
+    f(value);
+}
+
+// Zero Page addressing - take a 1 Byte address
+// and read from zero page memory (0x0000 - 0x00FF),
+// then passing that value to the calling instruction
+void zeropage(std::function<void (uint8_t*)> f){
+    uint8_t address;
+    uint8_t *value;
+    address = *cpu->nextByte();
+    value = mmu->read(&address);
+
+    f(value);
+}
+
+// Zero Page, X - take a 1 Byte address, then add
+// the current value of the X register to it. This value
+// is used as an address into zero page memory, the
+// read of which address is passed to the calling function
+void zeropageX(std::function<void (uint8_t*)> f){
+    uint8_t address = 0;
+    uint8_t* value;
+    address += *cpu->nextByte();
+    address += cpu->X;
+    value = mmu->read(&address);
+
+    f(value);
+}
+
+// Absolute address - take a 2 Byte address
+// and pass this to the calling function
+void absolute(std::function<void (uint8_t*)> f){
+    uint16_t address = 0;
+    uint8_t* value;
+
+    address += *cpu->nextByte();
+    address += *cpu->nextByte() * 16;
+    value = mmu->read(&address);
+
+    f(value);
+}
+
+void absoluteX(std::function<void (uint8_t*)> f){
+    uint16_t address = 0;
+    uint8_t *value;
+    address += *cpu->nextByte();
+    address += *cpu->nextByte() * 16;
+    address += cpu->X;
+    value = mmu->read(&address);
+
+    f(value);
+}
+
+void absoluteY(std::function<void (uint8_t*)> f){
+    uint16_t address = 0;
+    uint8_t *value;
+    address += *cpu->nextByte();
+    address += *cpu->nextByte() * 16;
+    address += cpu->Y;
+    value = mmu->read(&address);
+
+    f(value);
+}
+
+void indirectX(std::function<void (uint8_t*)> f){
+    uint8_t indirect_address = 0;
+    uint16_t target_address = 0;
+    uint8_t *value;
+
+    indirect_address += *cpu->nextByte();
+    indirect_address += cpu->X;
+    target_address += *mmu->read(&indirect_address);
+    indirect_address++;
+    target_address += *mmu->read(&indirect_address) * 16;
+    value = mmu->read(&target_address);
+
+    f(value);
+}
+
+void indirectY(std::function<void (uint8_t*)> f){
+    uint8_t indirect_address = 0;
+    uint16_t target_address = 0;
+    uint8_t *value;
+
+    indirect_address += *cpu->nextByte();
+    target_address += *mmu->read(&indirect_address);
+    indirect_address++;
+    target_address += *mmu->read(&indirect_address) * 16;
+    target_address += cpu->Y;
+    value = mmu->read(&target_address);
+
+    f(value);
+}
 
 /*
 // Add with Carry
@@ -73,15 +177,13 @@ void AND(){
 }
 */
 
-
-
 // ADC - Add with Carry
 
 // Base behavior for ADC instruction
 void ADC(uint8_t *value){
     uint8_t prior_A = cpu->A;
     cpu->A = cpu->A + *value + cpu->getStatusBit(C);
-
+    
     // Set processor status
     // Negative flag
     if ((cpu->A & 0x80) == 0x80){
@@ -113,105 +215,34 @@ void ADC(uint8_t *value){
     }
 }
 void ADC_I(){
-    uint8_t *value;
-    value = cpu->nextByte();
-
-    ADC(value);
+    immediate(ADC);
 }
 void ADC_Z(){
-    uint8_t address;
-    uint8_t *value;
-    address = *cpu->nextByte();
-    value = mmu->read(&address);
-
-    ADC(value);
+    zeropage(ADC);
 }
 void ADC_ZX(){
-    uint8_t address = 0;
-    uint8_t *value;
-    address += *cpu->nextByte();
-    address += cpu->X;
-    value = mmu->read(&address);
-
-    ADC(value);
+    zeropageX(ADC);
 }
 void ADC_A(){
-
-    uint16_t address = 0;
-    uint8_t *value;
-
-    address += *cpu->nextByte();
-    address += *cpu->nextByte() * 16;
-    value = mmu->read(&address);
-
-    ADC(value);
+    absolute(ADC);
 }
 void ADC_AX(){
-    uint16_t address = 0;
-    uint8_t *value;
-    address += *cpu->nextByte();
-    address += *cpu->nextByte() * 16;
-    address += cpu->X;
-    value = mmu->read(&address);
-
-    ADC(value);
+    absoluteX(ADC);
 }
 void ADC_AY(){
-    uint16_t address = 0;
-    uint8_t *value;
-    address += *cpu->nextByte();
-    address += *cpu->nextByte() * 16;
-    address += cpu->Y;
-    value = mmu->read(&address);
-
-    ADC(value);
+    absoluteY(ADC);
 }
 void ADC_IX(){
-    uint8_t indirect_address = 0;
-    uint16_t target_address = 0;
-    uint8_t *value;
-
-    indirect_address += *cpu->nextByte();
-    indirect_address += cpu->X;
-    target_address += *mmu->read(&indirect_address);
-    indirect_address++;
-    target_address += *mmu->read(&indirect_address) * 16;
-    value = mmu->read(&target_address);
-
-    ADC(value);
+    indirectX(ADC);
 }
 void ADC_IY(){
-    uint8_t indirect_address = 0;
-    uint16_t target_address = 0;
-    uint8_t *value;
-
-    indirect_address += *cpu->nextByte();
-    target_address += *mmu->read(&indirect_address);
-    indirect_address++;
-    target_address += *mmu->read(&indirect_address) * 16;
-    target_address += cpu->Y;
-    value = mmu->read(&target_address);
-
-    ADC(value);
+    indirectY(ADC);
 }
 
 // AND - Logical AND
-void AND(){}
-void AND_I(){}
-void AND_Z(){}
-void AND_ZX(){}
-void AND_A(){}
-void AND_AX(){}
-void AND_AY(){}
-void AND_IX(){}
-void AND_IY(){}
-
-// ASL - Arithmetic Shift Left
-void ASL(){
-
-    uint8_t prior_A = cpu->A;
-    cpu->A = cpu->A << 1;
-
+void AND(uint8_t *value){
+    cpu->A = cpu->A & *value;
+    
     // Set processor status
     // Negative flag
     if ((cpu->A & 0x80) == 0x80){
@@ -226,20 +257,76 @@ void ASL(){
     }else{
         cpu->clearStatusBit(Z);
     }
+}
+void AND_I(){
+    immediate(AND);
+}
+void AND_Z(){
+    zeropage(AND);
+}
+void AND_ZX(){
+    zeropageX(AND);
+}
+void AND_A(){
+    absolute(AND);
+}
+void AND_AX(){
+    absoluteX(AND);
+}
+void AND_AY(){
+    absoluteY(AND);
+}
+void AND_IX(){
+    indirectX(AND);
+}
+void AND_IY(){
+    indirectY(AND);
+}
+
+// ASL - Arithmetic Shift Left
+void ASL_BASE(uint8_t* value){
+    uint8_t prior_value = *value;
+    *value <<= 1;
+    
+    // Set processor status
+    // Negative flag
+    if ((*value & 0x80) == 0x80){
+        cpu->setStatusBit(N);
+    }else{
+        cpu->clearStatusBit(N);
+    }
+    
+    // Zero flag
+    if (cpu->A == 0){
+        cpu->setStatusBit(Z);
+    }else{
+        cpu->clearStatusBit(Z);
+    }
 
     // Carry flag
-    if ((prior_A & 0x80) == 0x80){
+    if ((prior_value & 0x80) == 0x80){
         cpu->setStatusBit(C);
     }else{
         cpu->clearStatusBit(C);
     }
 }
+void ASL(){
+    ASL_BASE(&(cpu->A));
+}
+void ASL_Z(){
+    zeropage(ASL_BASE);
+}
+void ASL_ZX(){
+    zeropageX(ASL_BASE);
+}
+void ASL_A(){
+    absolute(ASL_BASE);
+}
+void ASL_AX(){
+    absoluteX(ASL_BASE);
+}
 
-void ASL_Z(){}
-void ASL_ZX(){}
-void ASL_A(){}
-void ASL_AX(){}
-
+// Base branch functionality (relative addressing)
 void BRANCH(int8_t* offset){
     cpu->PC = cpu->PC + *offset;
 }

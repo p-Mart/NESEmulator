@@ -2,6 +2,17 @@
 #define INSTRUCTIONS_H
 
 #include <cstdint>
+#include <functional>
+
+// Addressing utility functions
+void immediate(std::function<void (uint8_t*)>);
+void zeropage(std::function<void (uint8_t*)>);
+void zeropageX(std::function<void (uint8_t*)>);
+void absolute(std::function<void (uint8_t*)>);
+void absoluteX(std::function<void (uint8_t*)>);
+void absoluteY(std::function<void (uint8_t*)>);
+void indirectX(std::function<void (uint8_t*)>);
+void indirectY(std::function<void (uint8_t*)>);
 
 // Naming convention for functions:
 //      (OPCODE)_(ADDRESSINGMODE)
@@ -30,7 +41,7 @@ void ADC_IX();
 void ADC_IY();
 
 // AND - Logical AND
-void AND();
+void AND(uint8_t*);
 void AND_I();
 void AND_Z();
 void AND_ZX();
@@ -41,14 +52,15 @@ void AND_IX();
 void AND_IY();
 
 // ASL - Arithmetic Shift Left
-void ASL();
+void ASL_BASE(uint8_t*);
+void ASL(); // This is for accumulator
 void ASL_Z();
 void ASL_ZX();
 void ASL_A();
 void ASL_AX();
 
 // Branch base functionality
-void BRANCH(uint8_t*);
+void BRANCH(int8_t*);
 
 // BCC - Branch if Carry Clear
 void BCC();

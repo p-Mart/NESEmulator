@@ -39,6 +39,14 @@ int main(void){
         return th.checkEqual("A is 255", cpu->A, 16);
     }));
 
+    th.registerTest(new UnitTest("Test Program 3", [&] (){
+        cpu->clearRegisters();
+        cpu->loadProgram("test_program_2.nes");
+        cpu->runProgram();
+
+        return th.checkEqual("A is 255", cpu->A, 255);
+    }));
+
     th.runAllTests();
 
     return 0;
