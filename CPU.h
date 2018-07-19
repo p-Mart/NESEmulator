@@ -27,6 +27,11 @@ public:
     // 16-bit program counter
     uint16_t PC;
 
+    // Stack pointer, initialized at 0x01FF
+    // Note that SP is only 1 Byte, and points
+    // to the top of the 0x01XX page
+    uint8_t SP;
+
     /* 8-bit registers. They are:
     A - Accumulator register
     X - Index Register X
@@ -46,6 +51,12 @@ public:
     void printRegisters();
     void runProgram();
     void loadProgram(std::string);
+
+    void pushStack(uint8_t*);
+    void pushStack(uint16_t*);
+
+    uint8_t *popStack();
+
 };
 
 

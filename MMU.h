@@ -45,6 +45,8 @@ class MMU{
 
         void write(uint16_t*, uint8_t*);
         void write(uint8_t*, uint8_t*);
+        void writeStack(uint8_t*, uint8_t*);
+        uint8_t *readStack(uint8_t*);
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "CPU.h"
+#include "MMU.h"
 #include "instructions.h"
 #include "calltable.h"
 
@@ -14,12 +15,13 @@ using namespace std;
 CPU* CPU::instance = 0;
 
 CPU::CPU(){
-    // Initialize Registers / PC
-    uint16_t PC = 0x0000;
-    uint8_t A = 0x00;
-    uint8_t X = 0x00;
-    uint8_t Y = 0x00;
-    uint8_t P = 0x00;
+    // Initialize Registers / PC / SP
+    PC = 0x0000;
+    SP = 0xFF;
+    A = 0x00;
+    X = 0x00;
+    Y = 0x00;
+    P = 0x00;
 }
 
 CPU* CPU::getInstance(){
@@ -115,6 +117,7 @@ void CPU::clearStatusBit(uint8_t bit){
 
 void CPU::clearRegisters(void){
     A = X = Y = P = 0x00;
+    SP = 0xFF;
     PC = 0x0000;
 }
 
@@ -179,3 +182,24 @@ void CPU::loadProgram(string filename){
     }
 }
 
+uint8_t *CPU::popStack(){
+    uint8_t *value = MMU::getInstance()->readStack(&SP);
+    SP = SP + 1;
+}
+
+void CPU::pushStack(uint8_t *value){
+    MMU::getInstance()->writeStack(&SP, value);
+    SP = SP - 1;
+}
+void CPU::pushStack(uint16_t *value){
+    uint8_t lsb = 0;
+    uint8_t msb = 0;
+    lsb += (*value & 0x00FF);
+    msb += (*value >> 8);
+    
+    MMU::getInstance()->writeStack(&SP, &msb);
+    SP = SP - 1;
+
+    MMU::getInstance()->writeStack(&SP, &lsb);
+    SP = SP - 1;
+}

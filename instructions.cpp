@@ -9,10 +9,6 @@
 
 using namespace std;
 
-// Get singleton instances
-CPU* cpu = CPU::getInstance();
-MMU* mmu = MMU::getInstance();
-
 // Addressing mode wrappers
 
 // Immediate addressing - take a 1 Byte constant
@@ -20,7 +16,7 @@ MMU* mmu = MMU::getInstance();
 // to the calling instruction
 void immediate(std::function<void (uint8_t*)> f){
 
-    uint8_t* value = cpu->nextByte();
+    uint8_t* value = CPU::getInstance()->nextByte();
     f(value);
 }
 
@@ -30,8 +26,8 @@ void immediate(std::function<void (uint8_t*)> f){
 void zeropage(std::function<void (uint8_t*)> f){
     uint8_t address;
     uint8_t *value;
-    address = *cpu->nextByte();
-    value = mmu->read(&address);
+    address = *CPU::getInstance()->nextByte();
+    value = MMU::getInstance()->read(&address);
 
     f(value);
 }
@@ -43,9 +39,19 @@ void zeropage(std::function<void (uint8_t*)> f){
 void zeropageX(std::function<void (uint8_t*)> f){
     uint8_t address = 0;
     uint8_t* value;
-    address += *cpu->nextByte();
-    address += cpu->X;
-    value = mmu->read(&address);
+    address += *CPU::getInstance()->nextByte();
+    address += CPU::getInstance()->X;
+    value = MMU::getInstance()->read(&address);
+
+    f(value);
+}
+
+void zeropageY(std::function<void (uint8_t*)> f){
+    uint8_t address = 0;
+    uint8_t* value;
+    address += *CPU::getInstance()->nextByte();
+    address += CPU::getInstance()->Y;
+    value = MMU::getInstance()->read(&address);
 
     f(value);
 }
@@ -56,9 +62,9 @@ void absolute(std::function<void (uint8_t*)> f){
     uint16_t address = 0;
     uint8_t* value;
 
-    address += *cpu->nextByte();
-    address += *cpu->nextByte() * 16;
-    value = mmu->read(&address);
+    address += *CPU::getInstance()->nextByte();
+    address += *CPU::getInstance()->nextByte() * 16;
+    value = MMU::getInstance()->read(&address);
 
     f(value);
 }
@@ -66,10 +72,10 @@ void absolute(std::function<void (uint8_t*)> f){
 void absoluteX(std::function<void (uint8_t*)> f){
     uint16_t address = 0;
     uint8_t *value;
-    address += *cpu->nextByte();
-    address += *cpu->nextByte() * 16;
-    address += cpu->X;
-    value = mmu->read(&address);
+    address += *CPU::getInstance()->nextByte();
+    address += *CPU::getInstance()->nextByte() * 16;
+    address += CPU::getInstance()->X;
+    value = MMU::getInstance()->read(&address);
 
     f(value);
 }
@@ -77,10 +83,10 @@ void absoluteX(std::function<void (uint8_t*)> f){
 void absoluteY(std::function<void (uint8_t*)> f){
     uint16_t address = 0;
     uint8_t *value;
-    address += *cpu->nextByte();
-    address += *cpu->nextByte() * 16;
-    address += cpu->Y;
-    value = mmu->read(&address);
+    address += *CPU::getInstance()->nextByte();
+    address += *CPU::getInstance()->nextByte() * 16;
+    address += CPU::getInstance()->Y;
+    value = MMU::getInstance()->read(&address);
 
     f(value);
 }
@@ -90,12 +96,12 @@ void indirectX(std::function<void (uint8_t*)> f){
     uint16_t target_address = 0;
     uint8_t *value;
 
-    indirect_address += *cpu->nextByte();
-    indirect_address += cpu->X;
-    target_address += *mmu->read(&indirect_address);
+    indirect_address += *CPU::getInstance()->nextByte();
+    indirect_address += CPU::getInstance()->X;
+    target_address += *MMU::getInstance()->read(&indirect_address);
     indirect_address++;
-    target_address += *mmu->read(&indirect_address) * 16;
-    value = mmu->read(&target_address);
+    target_address += *MMU::getInstance()->read(&indirect_address) * 16;
+    value = MMU::getInstance()->read(&target_address);
 
     f(value);
 }
@@ -105,113 +111,50 @@ void indirectY(std::function<void (uint8_t*)> f){
     uint16_t target_address = 0;
     uint8_t *value;
 
-    indirect_address += *cpu->nextByte();
-    target_address += *mmu->read(&indirect_address);
+    indirect_address += *CPU::getInstance()->nextByte();
+    target_address += *MMU::getInstance()->read(&indirect_address);
     indirect_address++;
-    target_address += *mmu->read(&indirect_address) * 16;
-    target_address += cpu->Y;
-    value = mmu->read(&target_address);
+    target_address += *MMU::getInstance()->read(&indirect_address) * 16;
+    target_address += CPU::getInstance()->Y;
+    value = MMU::getInstance()->read(&target_address);
 
     f(value);
 }
 
-/*
-// Add with Carry
-void ADC(){
-
-    uint8_t prior_A = A;
-    A = A + value + getStatusBit(C);
-
-    // Set processor status
-    
-    // Negative flag
-    if ((A & 0x80) == 0x80){
-        setStatusBit(N);
-    }else{
-        clearStatusBit(N);
-    }
-    
-    // Zero flag
-    if (A == 0){
-        setStatusBit(Z);
-    }else{
-        clearStatusBit(Z);
-    }
-
-    // Overflow flag
-    // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-    if (((prior_A ^ A) & (value ^ A) & 0x80) != 0x00){
-        setStatusBit(V);
-    }else{
-        clearStatusBit(V);
-    }
-
-    // Carry flag
-    if ((prior_A + value + getStatusBit(C)) > 0xff){
-        setStatusBit(C);
-    }else{
-        clearStatusBit(C);
-    }
-}
-
-void AND(){
-
-    uint8_t prior_A = A;
-    A = A & value;
-
-    // Set processor status
-    
-    // Negative flag
-    if ((A & 0x80) == 0x80){
-        setStatusBit(N);
-    }else{
-        clearStatusBit(N);
-    }
-    
-    // Zero flag
-    if (A == 0){
-        setStatusBit(Z);
-    }else{
-        clearStatusBit(Z);
-    }
-}
-*/
-
 // ADC - Add with Carry
-
 // Base behavior for ADC instruction
 void ADC(uint8_t *value){
-    uint8_t prior_A = cpu->A;
-    cpu->A = cpu->A + *value + cpu->getStatusBit(C);
+    uint8_t prior_A = CPU::getInstance()->A;
+    CPU::getInstance()->A = CPU::getInstance()->A + *value + CPU::getInstance()->getStatusBit(C);
     
     // Set processor status
     // Negative flag
-    if ((cpu->A & 0x80) == 0x80){
-        cpu->setStatusBit(N);
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
     }else{
-        cpu->clearStatusBit(N);
+        CPU::getInstance()->clearStatusBit(N);
     }
     
     // Zero flag
-    if (cpu->A == 0){
-        cpu->setStatusBit(Z);
+    if (CPU::getInstance()->A == 0){
+        CPU::getInstance()->setStatusBit(Z);
     }else{
-        cpu->clearStatusBit(Z);
+        CPU::getInstance()->clearStatusBit(Z);
     }
 
     // Overflow flag
     // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-    if (((prior_A ^ cpu->A) & (*value ^ cpu->A) & 0x80) != 0x00){
-        cpu->setStatusBit(V);
+    if (((prior_A ^ CPU::getInstance()->A) & (*value ^ CPU::getInstance()->A) & 0x80) != 0x00){
+        CPU::getInstance()->setStatusBit(V);
     }else{
-        cpu->clearStatusBit(V);
+        CPU::getInstance()->clearStatusBit(V);
     }
 
     // Carry flag
-    if ((prior_A + *value + cpu->getStatusBit(C)) > 0xff){
-        cpu->setStatusBit(C);
+    if ((prior_A + *value + CPU::getInstance()->getStatusBit(C)) > 0xff){
+        CPU::getInstance()->setStatusBit(C);
     }else{
-        cpu->clearStatusBit(C);
+        CPU::getInstance()->clearStatusBit(C);
     }
 }
 void ADC_I(){
@@ -241,21 +184,21 @@ void ADC_IY(){
 
 // AND - Logical AND
 void AND(uint8_t *value){
-    cpu->A = cpu->A & *value;
+    CPU::getInstance()->A = CPU::getInstance()->A & *value;
     
     // Set processor status
     // Negative flag
-    if ((cpu->A & 0x80) == 0x80){
-        cpu->setStatusBit(N);
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
     }else{
-        cpu->clearStatusBit(N);
+        CPU::getInstance()->clearStatusBit(N);
     }
     
     // Zero flag
-    if (cpu->A == 0){
-        cpu->setStatusBit(Z);
+    if (CPU::getInstance()->A == 0){
+        CPU::getInstance()->setStatusBit(Z);
     }else{
-        cpu->clearStatusBit(Z);
+        CPU::getInstance()->clearStatusBit(Z);
     }
 }
 void AND_I(){
@@ -291,27 +234,27 @@ void ASL_BASE(uint8_t* value){
     // Set processor status
     // Negative flag
     if ((*value & 0x80) == 0x80){
-        cpu->setStatusBit(N);
+        CPU::getInstance()->setStatusBit(N);
     }else{
-        cpu->clearStatusBit(N);
+        CPU::getInstance()->clearStatusBit(N);
     }
     
     // Zero flag
-    if (cpu->A == 0){
-        cpu->setStatusBit(Z);
+    if (CPU::getInstance()->A == 0){
+        CPU::getInstance()->setStatusBit(Z);
     }else{
-        cpu->clearStatusBit(Z);
+        CPU::getInstance()->clearStatusBit(Z);
     }
 
     // Carry flag
     if ((prior_value & 0x80) == 0x80){
-        cpu->setStatusBit(C);
+        CPU::getInstance()->setStatusBit(C);
     }else{
-        cpu->clearStatusBit(C);
+        CPU::getInstance()->clearStatusBit(C);
     }
 }
 void ASL(){
-    ASL_BASE(&(cpu->A));
+    ASL_BASE(&(CPU::getInstance()->A));
 }
 void ASL_Z(){
     zeropage(ASL_BASE);
@@ -328,16 +271,16 @@ void ASL_AX(){
 
 // Base branch functionality (relative addressing)
 void BRANCH(int8_t* offset){
-    cpu->PC = cpu->PC + *offset;
+    CPU::getInstance()->PC = CPU::getInstance()->PC + *offset;
 }
 
 // BCC - Branch if Carry Clear
 void BCC(){
 
     int8_t offset = 0;
-    offset += *cpu->nextByte();
+    offset += *CPU::getInstance()->nextByte();
     
-    if(cpu->getStatusBit(C) == 0){
+    if(CPU::getInstance()->getStatusBit(C) == 0){
         BRANCH(&offset);
     }
 }
@@ -346,9 +289,9 @@ void BCC(){
 void BCS(){
 
     int8_t offset = 0;
-    offset += *cpu->nextByte();
+    offset += *CPU::getInstance()->nextByte();
     
-    if(cpu->getStatusBit(C) == 1){
+    if(CPU::getInstance()->getStatusBit(C) == 1){
         BRANCH(&offset);
     }
 }
@@ -357,25 +300,52 @@ void BCS(){
 void BEQ(){
 
     int8_t offset = 0;
-    offset += *cpu->nextByte();
+    offset += *CPU::getInstance()->nextByte();
     
-    if(cpu->getStatusBit(Z) == 1){
+    if(CPU::getInstance()->getStatusBit(Z) == 1){
         BRANCH(&offset);
     }
 }
 
 // BIT - Bit Test
-void BIT(){}
-void BIT_Z(){}
-void BIT_A(){}
+void BIT(uint8_t* value){
+    // AND the A register with a value in memory
+    // but dont store the result -- just set the zero
+    // flag.
+    uint8_t result = *value & CPU::getInstance()->A;
+
+    if (result == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }
+
+    // Bit 7 and 6 of P are set to the contents
+    // of the memory value.
+    if ((*value & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+
+    if ((*value & 0x40) == 0x40){
+        CPU::getInstance()->setStatusBit(V);
+    }else{
+        CPU::getInstance()->clearStatusBit(V);
+    }
+}
+void BIT_Z(){
+    zeropage(BIT);
+}
+void BIT_A(){
+    absolute(BIT);
+}
 
 // BMI - Branch if Minus
 void BMI(){
 
     int8_t offset = 0;
-    offset += *cpu->nextByte();
+    offset += *CPU::getInstance()->nextByte();
     
-    if(cpu->getStatusBit(N) == 1){
+    if(CPU::getInstance()->getStatusBit(N) == 1){
         BRANCH(&offset);
     }
 }
@@ -384,9 +354,9 @@ void BMI(){
 void BNE(){
 
     int8_t offset = 0;
-    offset += *cpu->nextByte();
+    offset += *CPU::getInstance()->nextByte();
     
-    if(cpu->getStatusBit(Z) == 0){
+    if(CPU::getInstance()->getStatusBit(Z) == 0){
         BRANCH(&offset);
     }
 }
@@ -395,23 +365,30 @@ void BNE(){
 void BPL(){
 
     int8_t offset = 0;
-    offset += *cpu->nextByte();
+    offset += *CPU::getInstance()->nextByte();
     
-    if(cpu->getStatusBit(N) == 0){
+    if(CPU::getInstance()->getStatusBit(N) == 0){
         BRANCH(&offset);
     }
 }
 
 // BRK - Force Interrupt
-void BRK(){}
+void BRK(){
+    // Need to push PC and P onto stack
+    // Need to load the IRQ interrupt vector (0xFFFE - 0XFFFF)
+    //      into PC
+
+    // 7 cycle burn
+    CPU::getInstance()->setStatusBit(B);
+}
 
 // BVC - Branch if Overflow Clear
 void BVC(){
 
     int8_t offset = 0;
-    offset += *cpu->nextByte();
+    offset += *CPU::getInstance()->nextByte();
     
-    if(cpu->getStatusBit(V) == 0){
+    if(CPU::getInstance()->getStatusBit(V) == 0){
         BRANCH(&offset);
     }
 }
@@ -420,274 +397,896 @@ void BVC(){
 void BVS(){
 
     int8_t offset = 0;
-    offset += *cpu->nextByte();
+    offset += *CPU::getInstance()->nextByte();
     
-    if(cpu->getStatusBit(V) == 1){
+    if(CPU::getInstance()->getStatusBit(V) == 1){
         BRANCH(&offset);
     }
 }
 
 // CLC - Clear Carry Flag
 void CLC(){
-    cpu->clearStatusBit(C);
+    CPU::getInstance()->clearStatusBit(C);
 }
 
 // CLD - Clear Decimal Mode
 void CLD(){
-    cpu->clearStatusBit(D);
+    CPU::getInstance()->clearStatusBit(D);
 }
 
 // CLI - Clear Interrupt Disable
 void CLI(){
-    cpu->clearStatusBit(I);
+    CPU::getInstance()->clearStatusBit(I);
 }
 
 // CLV - Clear Overflow Flag
 void CLV(){
-    cpu->clearStatusBit(V);
+    CPU::getInstance()->clearStatusBit(V);
 }
 
 // CMP - Compare
-void CMP(){}
-void CMP_I(){}
-void CMP_Z(){}
-void CMP_ZX(){}
-void CMP_A(){}
-void CMP_AX(){}
-void CMP_AY(){}
-void CMP_IX(){}
-void CMP_IY(){}
+void CMP(uint8_t* value){
+    uint8_t result = (CPU::getInstance()->A == *value);
+
+    if (result == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if (CPU::getInstance()->A >= *value){
+        CPU::getInstance()->setStatusBit(C);
+    }else{
+        CPU::getInstance()->clearStatusBit(C);
+    }
+
+    if ((result & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
+void CMP_I(){
+    immediate(CMP);
+}
+void CMP_Z(){
+    zeropage(CMP);
+}
+void CMP_ZX(){
+    zeropageX(CMP);
+}
+void CMP_A(){
+    absolute(CMP);
+}
+void CMP_AX(){
+    absoluteX(CMP);
+}
+void CMP_AY(){
+    absoluteY(CMP);
+}
+void CMP_IX(){
+    indirectX(CMP);
+}
+void CMP_IY(){
+    indirectY(CMP);
+}
 
 // CPX - Compare X Register
-void CPX(){}
-void CPX_I(){}
-void CPX_Z(){}
-void CPX_A(){}
+void CPX(uint8_t* value){
+    
+    uint8_t result = (CPU::getInstance()->X == *value);
+
+    if (result == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if (CPU::getInstance()->X >= *value){
+        CPU::getInstance()->setStatusBit(C);
+    }else{
+        CPU::getInstance()->clearStatusBit(C);
+    }
+
+    if ((result & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
+void CPX_I(){
+    immediate(CPX);
+}
+void CPX_Z(){
+    zeropage(CPX);
+}
+void CPX_A(){
+    absolute(CPX);
+}
 
 // CPY - Compare Y Register
-void CPY(){}
-void CPY_I(){}
-void CPY_Z(){}
-void CPY_A(){}
+void CPY(uint8_t* value){
+    uint8_t result = (CPU::getInstance()->Y == *value);
+
+    if (result == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if (CPU::getInstance()->Y >= *value){
+        CPU::getInstance()->setStatusBit(C);
+    }else{
+        CPU::getInstance()->clearStatusBit(C);
+    }
+
+    if ((result & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
+void CPY_I(){
+    immediate(CPY);
+}
+void CPY_Z(){
+    zeropage(CPY);
+}
+void CPY_A(){
+    absolute(CPY);
+}
 
 // DEC - Decrement Memory
-void DEC(){}
-void DEC_Z(){}
-void DEC_ZX(){}
-void DEC_A(){}
-void DEC_AX(){}
+void DEC(uint8_t* value){
+    uint8_t result;
+    *value = *value - 1;
+    result = *value;
+
+    if (result == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((result & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
+void DEC_Z(){
+    zeropage(DEC);
+}
+void DEC_ZX(){
+    zeropageX(DEC);
+}
+void DEC_A(){
+    absolute(DEC);
+}
+void DEC_AX(){
+    absoluteX(DEC);
+}
 
 // DEX - Decrement X Register
-void DEX(){}
+void DEX(){
+    CPU::getInstance()->X = CPU::getInstance()->X - 1;
+
+    if (CPU::getInstance()->X == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->X & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // DEX - Decrement Y Register
-void DEY(){}
+void DEY(){
+    CPU::getInstance()->Y = CPU::getInstance()->Y - 1;
+
+    if (CPU::getInstance()->Y == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->Y & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // EOR - Exclusive OR
-void EOR(){}
-void EOR_I(){}
-void EOR_Z(){}
-void EOR_ZX(){}
-void EOR_A(){}
-void EOR_AX(){}
-void EOR_AY(){}
-void EOR_IX(){}
-void EOR_IY(){}
+void EOR(uint8_t *value){
+    CPU::getInstance()->A = CPU::getInstance()->A ^ *value;
+    
+    // Set processor status
+    // Negative flag
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+    
+    // Zero flag
+    if (CPU::getInstance()->A == 0){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+}
+void EOR_I(){
+    immediate(EOR);
+}
+void EOR_Z(){
+    zeropage(EOR);
+}
+void EOR_ZX(){
+    zeropageX(EOR);
+}
+void EOR_A(){
+    absolute(EOR);
+}
+void EOR_AX(){
+    absoluteX(EOR);
+}
+void EOR_AY(){
+    absoluteY(EOR);
+}
+void EOR_IX(){
+    indirectX(EOR);
+}
+void EOR_IY(){
+    indirectY(EOR);
+}
 
 // INC - Increment Memory
-void INC(){}
-void INC_Z(){}
-void INC_ZX(){}
-void INC_A(){}
-void INC_AX(){}
+void INC(uint8_t* value){
+    uint8_t result;
+    *value = *value + 1;
+    result = *value;
+
+    if (result == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((result & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
+void INC_Z(){
+    zeropage(INC);
+}
+void INC_ZX(){
+    zeropageX(INC);
+}
+void INC_A(){
+    absolute(INC);
+}
+void INC_AX(){
+    absoluteX(INC);
+}
 
 // INX - Increment X Register
-void INX(){}
+void INX(){
+    CPU::getInstance()->X = CPU::getInstance()->X + 1;
+
+    if (CPU::getInstance()->X == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->X & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // INY - Increment Y Register
-void INY(){}
+void INY(){
+    CPU::getInstance()->Y = CPU::getInstance()->Y + 1;
+
+    if (CPU::getInstance()->Y == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->Y & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // JMP - Jump
-void JMP(){}
-void JMP_A(){}
-void JMP_I(){} // NOTE: This is for INDIRECT addressing (only JMP does this)
+void JMP(){
+
+}
+void JMP_A(){
+    uint16_t address = 0;
+    address += *CPU::getInstance()->nextByte();
+    address += *CPU::getInstance()->nextByte() * 16;
+
+    CPU::getInstance()->PC = address;
+}
+// This is indirect addressing, not immediate
+void JMP_I(){
+    uint16_t indirect_address = 0;
+    uint16_t target_address = 0;
+
+    indirect_address += *CPU::getInstance()->nextByte();
+    indirect_address += *CPU::getInstance()->nextByte() * 16;
+
+    target_address += *MMU::getInstance()->read(&indirect_address);
+    indirect_address += 1;
+    target_address += *MMU::getInstance()->read(&indirect_address) * 16;
+
+    CPU::getInstance()->PC = target_address;
+}
 
 // JSR - Jump to Subroutine
-void JSR(){} // Absolute addressing only
+void JSR(){
+    // Push current address - 1 on to stack as a return point
+    uint16_t return_point = CPU::getInstance()->PC - 1;
+    CPU::getInstance()->pushStack(&return_point);
+
+    // Set PC to target address
+    JMP_A();
+}
 
 // LDA - Load Accumulator
 void LDA(uint8_t *value){
-    cpu->A = *value;
+    CPU::getInstance()->A = *value;
+
+    if (CPU::getInstance()->A == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
 }
 void LDA_I(){
-    uint8_t *value = cpu->nextByte();
-    LDA(value);
+    immediate(LDA);
 }
 void LDA_Z(){
-    uint8_t *address = cpu->nextByte();
-    uint8_t *value = mmu->read(address);
-    LDA(value);
+    zeropage(LDA);
 }
-void LDA_ZX(){}
+void LDA_ZX(){
+    zeropageX(LDA);
+}
 void LDA_A(){
-
-    uint16_t address = 0;
-    address += *cpu->nextByte();
-    address += *cpu->nextByte() * 16;
-
-    uint8_t *value = mmu->read(&address);
-    LDA(value);
+    absolute(LDA);
 }
-void LDA_AX(){}
-void LDA_AY(){}
-void LDA_IX(){}
-void LDA_IY(){}
+void LDA_AX(){
+    absoluteX(LDA);
+}
+void LDA_AY(){
+    absoluteY(LDA);
+}
+void LDA_IX(){
+    indirectX(LDA);
+}
+void LDA_IY(){
+    indirectY(LDA);
+}
 
 // LDX - Load X Register
-void LDX(){}
-void LDX_I(){}
-void LDX_Z(){}
-void LDX_ZY(){} 
-void LDX_A(){}
-void LDX_AY(){}
+void LDX(uint8_t* value){
+    CPU::getInstance()->X = *value;
+
+    if (CPU::getInstance()->X == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->X & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
+void LDX_I(){
+    immediate(LDX);
+}
+void LDX_Z(){
+    zeropage(LDX);
+}
+void LDX_ZY(){
+    zeropageY(LDX);
+} 
+void LDX_A(){
+    absolute(LDX);
+}
+void LDX_AY(){
+    absoluteY(LDX);
+}
 
 // LDY - Load Y Register
-void LDY(){}
-void LDY_I(){}
-void LDY_Z(){}
-void LDY_ZX(){} 
-void LDY_A(){}
-void LDY_AX(){}
+void LDY(uint8_t *value){
+    CPU::getInstance()->Y = *value;
+
+    if (CPU::getInstance()->Y == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->Y & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
+void LDY_I(){
+    immediate(LDY);
+}
+void LDY_Z(){
+    zeropage(LDY);
+}
+void LDY_ZX(){
+    zeropageX(LDY);
+} 
+void LDY_A(){
+    absolute(LDY);
+}
+void LDY_AX(){
+    absoluteX(LDY);
+}
 
 // LSR - Logical Shift Right
-void LSR(){}
-void LSR_Z(){}
-void LSR_ZX(){}
-void LSR_A(){}
-void LSR_AX(){}
+void LSR_BASE(uint8_t *value){
+    uint8_t prior_value = *value;
+    *value >>= 1;
+    
+    // Set processor status
+    // Negative flag
+    if ((*value & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+    
+    // Zero flag
+    if (*value == 0){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    // Carry flag
+    if ((prior_value & 0x01) == 0x01){
+        CPU::getInstance()->setStatusBit(C);
+    }else{
+        CPU::getInstance()->clearStatusBit(C);
+    }
+}
+
+void LSR(){
+    LSR_BASE(&(CPU::getInstance()->A));
+}
+void LSR_Z(){
+    zeropage(LSR_BASE);
+}
+void LSR_ZX(){
+    zeropageX(LSR_BASE);
+}
+void LSR_A(){
+    absolute(LSR_BASE);
+}
+void LSR_AX(){
+    absoluteX(LSR_BASE);
+}
 
 // NOP - No Operation
 void NOP(){}
 
 // ORA - Logical Inclusive OR
-void ORA(){}
-void ORA_I(){}
-void ORA_Z(){}
-void ORA_ZX(){}
-void ORA_A(){}
-void ORA_AX(){}
-void ORA_AY(){}
-void ORA_IX(){}
-void ORA_IY(){}
+void ORA(uint8_t *value){
+    CPU::getInstance()->A = CPU::getInstance()->A | *value;
+    
+    // Set processor status
+    // Negative flag
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+    
+    // Zero flag
+    if (CPU::getInstance()->A == 0){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+}
+void ORA_I(){
+    immediate(ORA);
+}
+void ORA_Z(){
+    zeropage(ORA);
+}
+void ORA_ZX(){
+    zeropageX(ORA);
+}
+void ORA_A(){
+    absolute(ORA);
+}
+void ORA_AX(){
+    absoluteX(ORA);
+}
+void ORA_AY(){
+    absoluteY(ORA);
+}
+void ORA_IX(){
+    indirectX(ORA);
+}
+void ORA_IY(){
+    indirectY(ORA);
+}
 
 // PHA - Push Accumulator
-void PHA(){}
+void PHA(){
+    CPU::getInstance()->pushStack(&(CPU::getInstance()->A));
+}
 
 // PHP - Push Processor Status
-void PHP(){}
+void PHP(){
+    CPU::getInstance()->pushStack(&(CPU::getInstance()->PC));
+}
 
 // PLA - Pull Accumulator
-void PLA(){}
+void PLA(){
+    CPU::getInstance()->A = *CPU::getInstance()->popStack();
+
+    if (CPU::getInstance()->A == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // PLP - Pull Processor Status
-void PLP(){}
+void PLP(){
+    CPU::getInstance()->P = *CPU::getInstance()->popStack();
+}
 
 // ROL - Rotate Left
-void ROL(){}
-void ROL_Z(){}
-void ROL_ZX(){}
-void ROL_A(){}
-void ROL_AX(){}
+void ROL_BASE(uint8_t *value){
+    uint8_t prior_value=  *value;
+    *value = (*value << 1) | (*value >> 7);
+
+    // Set processor status
+    // Negative flag
+    if ((*value & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+    
+    // Zero flag
+    if (*value == 0){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    // Carry flag
+    if ((prior_value & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(C);
+    }else{
+        CPU::getInstance()->clearStatusBit(C);
+    }
+}
+void ROL(){
+    ROL_BASE(&(CPU::getInstance()->A));
+}
+void ROL_Z(){
+    zeropage(ROL_BASE);
+}
+void ROL_ZX(){
+    zeropageX(ROL_BASE);
+}
+void ROL_A(){
+    absolute(ROL_BASE);
+}
+void ROL_AX(){
+    absoluteX(ROL_BASE);
+}
 
 // ROR - Rotate Right
-void ROR(){}
-void ROR_Z(){}
-void ROR_ZX(){}
-void ROR_A(){}
-void ROR_AX(){}
+void ROR_BASE(uint8_t *value){
+    uint8_t prior_value = *value;
+    *value = (*value >> 1) | (*value << 7);
+
+    // Set processor status
+    // Negative flag
+    if ((*value & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+    
+    // Zero flag
+    if (*value == 0){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    // Carry flag
+    if ((prior_value & 0x01) == 0x01){
+        CPU::getInstance()->setStatusBit(C);
+    }else{
+        CPU::getInstance()->clearStatusBit(C);
+    }
+}
+void ROR(){
+    ROR_BASE(&(CPU::getInstance()->A));
+}
+void ROR_Z(){
+    zeropage(ROR_BASE);
+}
+void ROR_ZX(){
+    zeropageX(ROR_BASE);
+}
+void ROR_A(){
+    absolute(ROR_BASE);
+}
+void ROR_AX(){
+    absoluteX(ROR_BASE);
+}
 
 // RTI - Return from Interrupt
-void RTI(){}
+void RTI(){
+    CPU::getInstance()->P = *CPU::getInstance()->popStack();
+    CPU::getInstance()->PC = *CPU::getInstance()->popStack();
+}
 
 // RTS - Return from Subroutine
-void RTS(){}
+void RTS(){
+    CPU::getInstance()->PC = *CPU::getInstance()->popStack();
+}
 
 // SBC - Subtract with Carry
-void SBC(){}
-void SBC_I(){}
-void SBC_Z(){}
-void SBC_ZX(){}
-void SBC_A(){}
-void SBC_AX(){}
-void SBC_AY(){}
-void SBC_IX(){}
-void SBC_IY(){}
+void SBC(uint8_t *value){
+    // TODO : verify status bits
+    uint8_t prior_A = CPU::getInstance()->A;
+    CPU::getInstance()->A = CPU::getInstance()->A - *value - (1 - CPU::getInstance()->getStatusBit(C));
+    
+    // Set processor status
+    // Negative flag
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+    
+    // Zero flag
+    if (CPU::getInstance()->A == 0){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    // Overflow flag
+    // http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+    if (((prior_A ^ CPU::getInstance()->A) & (*value ^ CPU::getInstance()->A) & 0x80) != 0x00){
+        CPU::getInstance()->setStatusBit(V);
+    }else{
+        CPU::getInstance()->clearStatusBit(V);
+    }
+
+    // Carry flag
+    if ((prior_A + *value + CPU::getInstance()->getStatusBit(C)) > 0xff){
+        CPU::getInstance()->clearStatusBit(C);
+    }else{
+        CPU::getInstance()->setStatusBit(C);
+    }
+}
+void SBC_I(){
+    immediate(SBC);
+}
+void SBC_Z(){
+    zeropage(SBC);
+}
+void SBC_ZX(){
+    zeropageX(SBC);
+}
+void SBC_A(){
+    absolute(SBC);
+}
+void SBC_AX(){
+    absoluteX(SBC);
+}
+void SBC_AY(){
+    absoluteY(SBC);
+}
+void SBC_IX(){
+    indirectX(SBC);
+}
+void SBC_IY(){
+    indirectY(SBC);
+}
 
 // SEC - Set Carry Flag
 void SEC(){
-    cpu->setStatusBit(C);
+    CPU::getInstance()->setStatusBit(C);
 }
 
 // SED - Set Decimal Flag
 void SED(){
-    cpu->setStatusBit(D);
+    CPU::getInstance()->setStatusBit(D);
 }
 
 // SEI - Set Interrupt Disable
 void SEI(){
-    cpu->setStatusBit(I);
+    CPU::getInstance()->setStatusBit(I);
 }
 
 // STA - Store Accumulator
-void STA(uint16_t *address){
-    mmu->write(address, &cpu->A);
+void STA(uint8_t *value){
+    *value = CPU::getInstance()->A;
 }
-
 void STA_Z(){
-    uint16_t *value;
-    *value += *cpu->nextByte();
-    STA(value);
+    zeropage(STA);
 }
-
-void STA_ZX(){}
+void STA_ZX(){
+    zeropageX(STA);
+}
 void STA_A(){
-    uint16_t value = 0;
-    value += *cpu->nextByte();
-    value += *cpu->nextByte() * 16;
-    STA(&value);
+    absolute(STA);
 }
-
-void STA_AX(){}
-void STA_AY(){}
-void STA_IX(){}
-void STA_IY(){}
+void STA_AX(){
+    absoluteX(STA);
+}
+void STA_AY(){
+    absoluteY(STA);
+}
+void STA_IX(){
+    indirectX(STA);
+}
+void STA_IY(){
+    indirectY(STA);
+}
 
 // STX - Store X Register
-void STX(){}
-void STX_Z(){}
-void STX_ZY(){}
-void STX_A(){}
+void STX(uint8_t *value){
+    *value = CPU::getInstance()->X;
+}
+void STX_Z(){
+    zeropage(STX);
+}
+void STX_ZY(){
+    zeropageY(STX);
+}
+void STX_A(){
+    absolute(STX);
+}
 
 // STY - Store Y Register
-void STY(){}
-void STY_Z(){}
-void STY_ZX(){}
-void STY_A(){}
+void STY(uint8_t *value){
+    *value = CPU::getInstance()->Y;
+}
+void STY_Z(){
+    zeropage(STY);
+}
+void STY_ZX(){
+    zeropageY(STY);
+}
+void STY_A(){
+    absolute(STY);
+}
 
 // TAX - Transfer Accumulator to X
-void TAX(){}
+void TAX(){
+    CPU::getInstance()->X = CPU::getInstance()->A;
+
+    if (CPU::getInstance()->X == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->X & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // TAY - Transfer Accumulator to Y
-void TAY(){}
+void TAY(){
+    CPU::getInstance()->Y = CPU::getInstance()->A;
+
+    if (CPU::getInstance()->Y == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->Y & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // TSX - Transfer Stack Pointer to X
-void TSX(){}
+void TSX(){
+    CPU::getInstance()->X = CPU::getInstance()->SP;
+
+    if (CPU::getInstance()->X == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->X & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // TXA - Transfer X to Accumulator
-void TXA(){}
+void TXA(){
+    CPU::getInstance()->A = CPU::getInstance()->X;
+
+    if (CPU::getInstance()->A == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}
 
 // TXS - Transfer X to Stack Pointer
-void TXS(){}
+void TXS(){
+    CPU::getInstance()->SP = CPU::getInstance()->X;
+}
 
 // TYA - Transfer Y to Accumulator
-void TYA(){}
+void TYA(){
+    CPU::getInstance()->A = CPU::getInstance()->Y;
+
+    if (CPU::getInstance()->A == 0x00){
+        CPU::getInstance()->setStatusBit(Z);
+    }else{
+        CPU::getInstance()->clearStatusBit(Z);
+    }
+
+    if ((CPU::getInstance()->A & 0x80) == 0x80){
+        CPU::getInstance()->setStatusBit(N);
+    }else{
+        CPU::getInstance()->clearStatusBit(N);
+    }
+}

@@ -72,7 +72,7 @@ void BCS();
 void BEQ();
 
 // BIT - Bit Test
-void BIT();
+void BIT(uint8_t*);
 void BIT_Z();
 void BIT_A();
 
@@ -107,7 +107,7 @@ void CLI();
 void CLV();
 
 // CMP - Compare
-void CMP();
+void CMP(uint8_t*);
 void CMP_I();
 void CMP_Z();
 void CMP_ZX();
@@ -118,19 +118,19 @@ void CMP_IX();
 void CMP_IY();
 
 // CPX - Compare X Register
-void CPX();
+void CPX(uint8_t*);
 void CPX_I();
 void CPX_Z();
 void CPX_A();
 
 // CPY - Compare Y Register
-void CPY();
+void CPY(uint8_t*);
 void CPY_I();
 void CPY_Z();
 void CPY_A();
 
 // DEC - Decrement Memory
-void DEC();
+void DEC(uint8_t*);
 void DEC_Z();
 void DEC_ZX();
 void DEC_A();
@@ -143,7 +143,7 @@ void DEX();
 void DEY();
 
 // EOR - Exclusive OR
-void EOR();
+void EOR(uint8_t*);
 void EOR_I();
 void EOR_Z();
 void EOR_ZX();
@@ -154,7 +154,7 @@ void EOR_IX();
 void EOR_IY();
 
 // INC - Increment Memory
-void INC();
+void INC(uint8_t*);
 void INC_Z();
 void INC_ZX();
 void INC_A();
@@ -175,7 +175,7 @@ void JMP_I(); // NOTE: This is for INDIRECT addressing (only JMP does this)
 void JSR(); // Absolute addressing only
 
 // LDA - Load Accumulator
-void LDA();
+void LDA(uint8_t*);
 void LDA_I();
 void LDA_Z();
 void LDA_ZX();
@@ -186,7 +186,7 @@ void LDA_IX();
 void LDA_IY();
 
 // LDX - Load X Register
-void LDX();
+void LDX(uint8_t*);
 void LDX_I();
 void LDX_Z();
 void LDX_ZY(); 
@@ -194,7 +194,7 @@ void LDX_A();
 void LDX_AY();
 
 // LDY - Load Y Register
-void LDY();
+void LDY(uint8_t*);
 void LDY_I();
 void LDY_Z();
 void LDY_ZX(); 
@@ -202,6 +202,7 @@ void LDY_A();
 void LDY_AX();
 
 // LSR - Logical Shift Right
+void LSR_BASE(uint8_t*);
 void LSR();
 void LSR_Z();
 void LSR_ZX();
@@ -212,7 +213,7 @@ void LSR_AX();
 void NOP();
 
 // ORA - Logical Inclusive OR
-void ORA();
+void ORA(uint8_t*);
 void ORA_I();
 void ORA_Z();
 void ORA_ZX();
@@ -235,6 +236,7 @@ void PLA();
 void PLP();
 
 // ROL - Rotate Left
+void ROL_BASE(uint8_t*);
 void ROL();
 void ROL_Z();
 void ROL_ZX();
@@ -242,6 +244,7 @@ void ROL_A();
 void ROL_AX();
 
 // ROR - Rotate Right
+void ROR_BASE(uint8_t*);
 void ROR();
 void ROR_Z();
 void ROR_ZX();
@@ -255,7 +258,7 @@ void RTI();
 void RTS();
 
 // SBC - Subtract with Carry
-void SBC();
+void SBC(uint8_t*);
 void SBC_I();
 void SBC_Z();
 void SBC_ZX();
@@ -275,7 +278,7 @@ void SED();
 void SEI();
 
 // STA - Store Accumulator
-void STA(uint16_t*);
+void STA(uint8_t*);
 void STA_Z();
 void STA_ZX();
 void STA_A();
@@ -285,13 +288,13 @@ void STA_IX();
 void STA_IY();
 
 // STX - Store X Register
-void STX();
+void STX(uint8_t*);
 void STX_Z();
 void STX_ZY();
 void STX_A();
 
 // STY - Store Y Register
-void STY();
+void STY(uint8_t*);
 void STY_Z();
 void STY_ZX();
 void STY_A();
