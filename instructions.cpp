@@ -15,7 +15,6 @@ using namespace std;
 // at the next byte in the program and pass that
 // to the calling instruction
 void immediate(std::function<void (uint8_t*)> f){
-
     uint8_t* value = CPU::getInstance()->nextByte();
     f(value);
 }
@@ -63,7 +62,7 @@ void absolute(std::function<void (uint8_t*)> f){
     uint8_t* value;
 
     address += *CPU::getInstance()->nextByte();
-    address += *CPU::getInstance()->nextByte() * 16;
+    address += *CPU::getInstance()->nextByte() * 16 * 16;
     value = MMU::getInstance()->read(&address);
 
     f(value);
@@ -73,7 +72,7 @@ void absoluteX(std::function<void (uint8_t*)> f){
     uint16_t address = 0;
     uint8_t *value;
     address += *CPU::getInstance()->nextByte();
-    address += *CPU::getInstance()->nextByte() * 16;
+    address += *CPU::getInstance()->nextByte() * 16 * 16;
     address += CPU::getInstance()->X;
     value = MMU::getInstance()->read(&address);
 
@@ -84,7 +83,7 @@ void absoluteY(std::function<void (uint8_t*)> f){
     uint16_t address = 0;
     uint8_t *value;
     address += *CPU::getInstance()->nextByte();
-    address += *CPU::getInstance()->nextByte() * 16;
+    address += *CPU::getInstance()->nextByte() * 16 * 16;
     address += CPU::getInstance()->Y;
     value = MMU::getInstance()->read(&address);
 
@@ -100,7 +99,7 @@ void indirectX(std::function<void (uint8_t*)> f){
     indirect_address += CPU::getInstance()->X;
     target_address += *MMU::getInstance()->read(&indirect_address);
     indirect_address++;
-    target_address += *MMU::getInstance()->read(&indirect_address) * 16;
+    target_address += *MMU::getInstance()->read(&indirect_address) * 16 * 16;
     value = MMU::getInstance()->read(&target_address);
 
     f(value);
@@ -114,7 +113,7 @@ void indirectY(std::function<void (uint8_t*)> f){
     indirect_address += *CPU::getInstance()->nextByte();
     target_address += *MMU::getInstance()->read(&indirect_address);
     indirect_address++;
-    target_address += *MMU::getInstance()->read(&indirect_address) * 16;
+    target_address += *MMU::getInstance()->read(&indirect_address) * 16 * 16;
     target_address += CPU::getInstance()->Y;
     value = MMU::getInstance()->read(&target_address);
 
@@ -363,9 +362,11 @@ void BNE(){
 
 // BPL - Branch if Positive
 void BPL(){
-
+    int meme = 0;
     int8_t offset = 0;
     offset += *CPU::getInstance()->nextByte();
+    meme += offset;
+    std::cout << meme << std::endl;
     
     if(CPU::getInstance()->getStatusBit(N) == 0){
         BRANCH(&offset);
@@ -717,7 +718,7 @@ void JMP(){
 void JMP_A(){
     uint16_t address = 0;
     address += *CPU::getInstance()->nextByte();
-    address += *CPU::getInstance()->nextByte() * 16;
+    address += *CPU::getInstance()->nextByte() * 16 * 16;
 
     CPU::getInstance()->PC = address;
 }
@@ -727,11 +728,11 @@ void JMP_I(){
     uint16_t target_address = 0;
 
     indirect_address += *CPU::getInstance()->nextByte();
-    indirect_address += *CPU::getInstance()->nextByte() * 16;
+    indirect_address += *CPU::getInstance()->nextByte() * 16 * 16;
 
     target_address += *MMU::getInstance()->read(&indirect_address);
     indirect_address += 1;
-    target_address += *MMU::getInstance()->read(&indirect_address) * 16;
+    target_address += *MMU::getInstance()->read(&indirect_address) * 16 * 16;
 
     CPU::getInstance()->PC = target_address;
 }

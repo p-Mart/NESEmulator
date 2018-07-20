@@ -17,7 +17,7 @@ int main(void){
     cpu->printRegisters();
 
     
-    
+    /*
     th.registerTest(new UnitTest("Sanity test", [&] (){
         return th.checkEqual("1 is equal to 1", 1, 1);
     }));
@@ -36,17 +36,17 @@ int main(void){
         cpu->loadProgram("test_program_2.nes");
         cpu->runProgram();
 
-        return th.checkEqual("A is 255", cpu->A, 16);
-    }));
-
-    th.registerTest(new UnitTest("Test Program 3", [&] (){
-        cpu->clearRegisters();
-        cpu->loadProgram("test_program_2.nes");
-        cpu->runProgram();
-
         return th.checkEqual("A is 255", cpu->A, 255);
     }));
+    */
+    th.registerTest(new UnitTest("Dummy Reads", [&] (){
+        cpu->clearRegisters();
+        cpu->loadProgram("cpu_dummy_reads.nes");
+        cpu->runProgram();
 
+        return th.checkEqual("255 is 255", 255, 255);
+    }));
+    
     th.runAllTests();
 
     return 0;

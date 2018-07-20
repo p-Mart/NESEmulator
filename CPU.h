@@ -1,8 +1,10 @@
 #ifndef CPU_H
 #define CPU_H
 
+#define MAX_PROGRAM_SIZE 40976 //PRG-ROM + CHR-ROM + header bytes
 #include <cstdint>
 #include <string>
+
 // P bit references
 // [N, V, [ ], B, D, I, Z, C]
 const short int N = 0;
@@ -13,8 +15,6 @@ const short int I = 4;
 const short int Z = 5;
 const short int C = 6;
 
-
-
 class CPU{
 
     static CPU *instance;
@@ -22,7 +22,7 @@ class CPU{
 
 public:
 
-    uint8_t program[2048];
+    uint8_t program[MAX_PROGRAM_SIZE];
 
     // 16-bit program counter
     uint16_t PC;

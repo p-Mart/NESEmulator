@@ -22,6 +22,9 @@
 
 // Cartridge Space
 #define CARTRIDGE_START 0x4020
+#define PRG_ROM1_START 0x8000
+#define PRG_ROM1_END 0xBFFF
+#define PRG_ROM2_START 0xC000
 #define CARTRIDGE_END 0xFFFF
 #define INTERRUPTS_START 0xFFFA
 #define INTERRUPTS_END 0xFFFF
@@ -47,6 +50,7 @@ class MMU{
         void write(uint8_t*, uint8_t*);
         void writeStack(uint8_t*, uint8_t*);
         uint8_t *readStack(uint8_t*);
+        void memDump();
 };
 
 #endif

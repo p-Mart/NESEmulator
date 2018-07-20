@@ -1,3 +1,5 @@
 *.o
 *.out
 *.nes
+MMU_Dump.txt
+PPU_Dump.txt

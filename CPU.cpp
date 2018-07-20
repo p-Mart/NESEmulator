@@ -1,5 +1,6 @@
 #include "CPU.h"
 #include "MMU.h"
+#include "PPU.h"
 #include "instructions.h"
 #include "calltable.h"
 
@@ -9,6 +10,7 @@
 #include <string>
 #include <cstdint>
 #include <stdexcept>
+#include <assert.h>
 
 using namespace std;
 
@@ -124,23 +126,23 @@ void CPU::clearRegisters(void){
 void CPU::printRegisters(void){
     string status = bitset<8>(P).to_string();
     printf("A: %d X: %d Y: %d ", A, X, Y);
-    cout << "P: " << status << "\n";
+    std::cout << "P: " << status << "\n";
+    printf("PC: %04X SP: %04X\n", PC, SP);
 }
 
 void CPU::runProgram(){
-    uint8_t byte = program[PC];
+    uint8_t byte = *MMU::getInstance()->read(&PC);
     while(byte != 0x00){
-        byte = program[PC];
+        byte = *MMU::getInstance()->read(&PC);
 
-        printf("\nOpcode: %d\n", byte);
+        printf("\nOpcode: %02X\n", byte);
 
         // Attempt to run byte as opcode
         opcodes[byte](); 
 
-        printRegisters();
-
         // Increment PC by 1
         PC = PC + 1;
+        printRegisters();
     }
 }
 
@@ -148,38 +150,91 @@ void CPU::runProgram(){
 // simultaneously incrementing the
 // Program Counter
 uint8_t *CPU::nextByte(){
-    uint8_t *returned_bytes;
+    uint8_t *returned_byte;
     PC = PC + 1; // Increment PC by 1
-    returned_bytes = &program[PC];
+    returned_byte = MMU::getInstance()->read(&PC);
 
-    return returned_bytes;
+    return returned_byte;
 }
 
 void CPU::loadProgram(string filename){
     // Read .nes program
     ifstream test_file;
     string raw_program;
+
+
     test_file.open(filename);
 
     // Extract program into a single string
+    // For some unknown fucking reason, 
+    // this is pulling out the bytes in raw
+    // .nes files I find online. So whatever
     char c;
-    while(test_file >> c){
-        raw_program += c;
+    int i = 0;
+    while(test_file.get(c)){
+        program[i++] = c;
     }
-
     test_file.close();
 
-    // Every 2 characters forms a byte
-    int size = raw_program.length() / 2;
-    for(int i = 0; i < raw_program.length(); i+=2){
-        string byte = "";
-        byte += raw_program[i];
-        byte += raw_program[i+1];
-        
-        // Convert hex byte string into int representation
-        // and store in contiguous blocks of memory
-        program[i / 2] = strtoul(byte.c_str(), NULL, 16);
+    //// Process 16 Byte header
+    // For the .ines standard, the first 4 bytes
+    // MUST be the following
+    assert(program[0] == 0x4E);
+    assert(program[1] == 0x45);
+    assert(program[2] == 0x53);
+    assert(program[3] == 0x1A);
+
+    // Number of 16KB PRG-ROM banks
+    uint8_t n_prgrom_banks = program[4];
+
+    // Number of 8KB CHR-ROM banks
+    uint8_t n_chrrom_banks = program[5];
+
+    // First ROM Control Byte
+    uint8_t control_one = program[6];
+
+    // Second ROM Control Byte
+    uint8_t control_two = program[7];
+
+    // Number of 8KB RAM Banks
+    uint8_t n_ram_banks = program[8];
+
+    // Bytes 9 - 15 should be 0x00
+
+    // Get Memory Mapper
+
+    // Load PRG-ROM into memory
+    uint16_t prg_start = 16; //PRG-ROM starts at byte 16
+    uint16_t program_length = 16384 * n_prgrom_banks;
+    for(uint16_t i = 0; i < program_length; i++){
+        uint16_t address = PRG_ROM1_START + i;
+        MMU::getInstance()->write(&address, &program[prg_start + i]);
     }
+
+    // Load CHR-ROM into PPU memory
+    uint16_t chr_start = prg_start + program_length;
+    uint16_t chr_length = 8192 * n_chrrom_banks;
+    for(uint16_t i = 0; i < chr_length; i++){
+        uint16_t address = PATTERN_TABLE_START + i;
+        PPU::getInstance()->write(&address, &program[chr_start + i]);
+    }
+
+    // Get Interrupt Vectors
+
+    // RESET vector must be at 0xFFFC - 0xFFFD
+    uint16_t reset_vector = 0;
+    uint16_t reset_low = 0xFFFC;
+    uint16_t reset_high = 0xFFFD;
+
+    reset_vector += *MMU::getInstance()->read(&reset_low);
+    reset_vector += *MMU::getInstance()->read(&reset_high) * 16 * 16;
+
+    PC = reset_vector;
+
+    #ifndef NDEBUG
+        MMU::getInstance()->memDump();
+        PPU::getInstance()->memDump();
+    #endif
 }
 
 uint8_t *CPU::popStack(){
