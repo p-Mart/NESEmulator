@@ -56,9 +56,6 @@ public:
     void pushStack(uint16_t*);
 
     uint8_t *popStack();
-
 };
-
-
 
 #endif

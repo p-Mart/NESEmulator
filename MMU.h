@@ -17,8 +17,29 @@
 // I/O Register mapping
 #define IO_REGISTERS_START 0x2000
 #define IO_REGISTERS_END 0x401F
-#define PPU_REGISTERS_START 0x2000
-#define PPU_REGISTERS_END 0x2007
+
+#define SQ1_VOL 0x4000
+#define SQ1_SWEEP 0x4001
+#define SQ1_LO 0x4002
+#define SQ1_HI 0x4003
+#define SQ2_VOL 0x4004
+#define SQ2_SWEEP 0x4005
+#define SQ2_LOW 0x4006
+#define SQ2_HI 0x4007
+#define TRI_LINEAR 0x4008
+#define TRI_LO 0x400A
+#define TRI_HI 0x400B
+#define NOISE_VOL 0x400C
+#define NOISE_LO 0x400E
+#define NOISE_HI 0x400F
+#define DMC_FREQ 0x4010
+#define DMC_RAW 0x4011
+#define DMC_START 0x4012
+#define DMC_LEN 0x4013
+#define OAMDMA 0x4014
+#define SND_CHN 0x4015
+#define JOY1 0x4016
+#define JOY2 0x4017
 
 // Cartridge Space
 #define CARTRIDGE_START 0x4020

@@ -311,10 +311,15 @@ void BIT(uint8_t* value){
     // AND the A register with a value in memory
     // but dont store the result -- just set the zero
     // flag.
+    int meme = 0;
+    meme += *value;
+    std::cout << meme << std::endl;
     uint8_t result = *value & CPU::getInstance()->A;
 
     if (result == 0x00){
         CPU::getInstance()->setStatusBit(Z);
+    } else{
+        CPU::getInstance()->clearStatusBit(Z);
     }
 
     // Bit 7 and 6 of P are set to the contents

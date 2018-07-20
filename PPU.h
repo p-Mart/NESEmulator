@@ -2,6 +2,7 @@
 #define PPU_H
 
 #define PPU_MEMORY_SIZE 65536
+#define PPU_SPR_RAM_SIZE 256
 
 // PPU Memory Map Addresses
 #define PATTERN_TABLE_START 0x0000
@@ -9,6 +10,16 @@
 
 #define NAME_TABLE_START 0x2000
 #define NAME_TABLE_END 0x3EFF
+
+// Memory-Mapped IO 
+#define PPU_CTRL 0x2000
+#define PPU_MASK 0x2001
+#define PPU_STATUS 0x2002
+#define OAM_ADDR 0x2003
+#define OAM_DATA 0x2004
+#define PPU_SCROLL 0x2005
+#define PPU_ADDR 0x2006
+#define PPU_DATA 0x2007
 
 #define PALETTES_START 0x3F00
 #define PALETTES_END 0x3FFF
@@ -29,6 +40,7 @@ class PPU{
 
     // Internal 16-bit addressable memory
     uint8_t memory[PPU_MEMORY_SIZE];
+    uint8_t spr_ram[PPU_SPR_RAM_SIZE];
 
     PPU(){};
 
