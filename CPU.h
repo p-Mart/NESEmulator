@@ -52,6 +52,8 @@ public:
     void runProgram();
     void loadProgram(std::string);
 
+    void interruptNMI();
+
     void pushStack(uint8_t*);
     void pushStack(uint16_t*);
 
