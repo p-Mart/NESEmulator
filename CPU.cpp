@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <assert.h>
+#include <ctime>
 
 using namespace std;
 
@@ -24,6 +25,10 @@ CPU::CPU(){
     X = 0x00;
     Y = 0x00;
     P = 0x00;
+
+    // Initialize PPU (move to NES class?)
+    PPU::getInstance();
+
 }
 
 CPU* CPU::getInstance(){
@@ -132,18 +137,30 @@ void CPU::printRegisters(void){
 
 void CPU::runProgram(){
     uint8_t byte = *MMU::getInstance()->read(&PC);
-    while(byte != 0x00){
+    int cycles = 0;
+    while(cycles < 20000){
         byte = *MMU::getInstance()->read(&PC);
-
+        
         printf("\nOpcode: %02X\n", byte);
-
         // Attempt to run byte as opcode
         opcodes[byte](); 
+        printRegisters();
 
         // Increment PC by 1
         PC = PC + 1;
-        printRegisters();
+        cycles += 1;
+
+        // PPU Render tick
+        PPU::getInstance()->renderFrame(); 
+
+        // Handle Interrupts
+        //handleInterrupts();
     }
+
+    #ifndef NDEBUG
+        MMU::getInstance()->memDump();
+        PPU::getInstance()->memDump();
+    #endif
 }
 
 // Retrieves the next byte while 
@@ -158,6 +175,7 @@ uint8_t *CPU::nextByte(){
 }
 
 void CPU::loadProgram(string filename){
+
     // Read .nes program
     ifstream test_file;
     string raw_program;
@@ -172,10 +190,11 @@ void CPU::loadProgram(string filename){
     char c;
     int i = 0;
     while(test_file.get(c)){
-        program[i++] = c;
+        program.push_back(c);
     }
     test_file.close();
 
+    std::cout << program.size() << std::endl;
     //// Process 16 Byte header
     // For the .ines standard, the first 4 bytes
     // MUST be the following
@@ -206,21 +225,35 @@ void CPU::loadProgram(string filename){
     // Load PRG-ROM into memory
     uint16_t prg_start = 16; //PRG-ROM starts at byte 16
     uint16_t program_length = 16384 * n_prgrom_banks;
-    for(uint16_t i = 0; i < program_length; i++){
-        uint16_t address = PRG_ROM1_START + i;
-        MMU::getInstance()->write(&address, &program[prg_start + i]);
+
+    // 1 PRG-ROM -> bank 1 is copied to bank 2
+    if(n_prgrom_banks == 1){
+        for(uint16_t i = 0; i < program_length; i++){
+            uint16_t address = PRG_ROM1_START + i;
+            MMU::getInstance()->write(&address, &program[prg_start + i]);
+        }
+        for(uint16_t i = 0; i < program_length; i++){
+            uint16_t address = PRG_ROM2_START + i;
+            MMU::getInstance()->write(&address, &program[prg_start + i]);
+        }
     }
 
-    // Load CHR-ROM into PPU memory
+    if(n_prgrom_banks == 2){
+        for(uint16_t i = 0; i < program_length; i++){
+            uint16_t address = PRG_ROM1_START + i;
+            MMU::getInstance()->write(&address, &program[prg_start + i]);
+        }
+    }
+
+    // Load CHR-ROM (Bank 1) into PPU memory
     uint16_t chr_start = prg_start + program_length;
-    uint16_t chr_length = 8192 * n_chrrom_banks;
+    uint16_t chr_length = 8192;
     for(uint16_t i = 0; i < chr_length; i++){
         uint16_t address = PATTERN_TABLE_START + i;
         PPU::getInstance()->write(&address, &program[chr_start + i]);
     }
 
     // Get Interrupt Vectors
-
     // RESET vector must be at 0xFFFC - 0xFFFD
     uint16_t reset_vector = 0;
     uint16_t reset_low = 0xFFFC;
@@ -238,8 +271,8 @@ void CPU::loadProgram(string filename){
 }
 
 uint8_t *CPU::popStack(){
-    uint8_t *value = MMU::getInstance()->readStack(&SP);
     SP = SP + 1;
+    uint8_t *value = MMU::getInstance()->readStack(&SP);
 }
 
 void CPU::pushStack(uint8_t *value){
@@ -250,11 +283,26 @@ void CPU::pushStack(uint16_t *value){
     uint8_t lsb = 0;
     uint8_t msb = 0;
     lsb += (*value & 0x00FF);
-    msb += (*value >> 8);
+    msb += ((*value & 0xFF00 ) >> 8);
     
     MMU::getInstance()->writeStack(&SP, &msb);
     SP = SP - 1;
 
     MMU::getInstance()->writeStack(&SP, &lsb);
     SP = SP - 1;
+}
+
+void CPU::interruptNMI(){
+    // Push current PC and processor status onto stack, and set the I flag
+    pushStack(&PC);
+    pushStack(&P);
+    SEI();
+
+    uint16_t nmi_lo = 0xFFFA;
+    uint16_t nmi_hi = 0xFFFB;
+
+    // Load address of interrupt handling routine into PC
+    PC = 0;
+    PC += *MMU::getInstance()->read(&nmi_lo);
+    PC += *MMU::getInstance()->read(&nmi_hi) *  256;
 }

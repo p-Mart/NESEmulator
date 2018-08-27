@@ -1,9 +1,9 @@
 #ifndef CPU_H
 #define CPU_H
 
-#define MAX_PROGRAM_SIZE 40976 //PRG-ROM + CHR-ROM + header bytes
 #include <cstdint>
 #include <string>
+#include <vector>
 
 // P bit references
 // [N, V, [ ], B, D, I, Z, C]
@@ -22,7 +22,7 @@ class CPU{
 
 public:
 
-    uint8_t program[MAX_PROGRAM_SIZE];
+    std::vector<uint8_t> program;
 
     // 16-bit program counter
     uint16_t PC;

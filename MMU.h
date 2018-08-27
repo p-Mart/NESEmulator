@@ -6,7 +6,7 @@
 // Memory Map Addresses
 // RAM
 #define INTERNAL_MEMORY_START 0x0000
-#define INTERNAL_MEMORY_END 0x07FF
+#define INTERNAL_MEMORY_END 0x1FFF
 #define ZERO_PAGE_START 0x0000
 #define ZERO_PAGE_END 0x00FF
 #define STACK_START 0x0100
@@ -17,6 +17,11 @@
 // I/O Register mapping
 #define IO_REGISTERS_START 0x2000
 #define IO_REGISTERS_END 0x401F
+
+#define PPU_START 0x2000
+#define PPU_END 0x2007
+#define PPU_MIRRORS_START 0x2008
+#define PPU_MIRRORS_END 0x3FFF
 
 #define SQ1_VOL 0x4000
 #define SQ1_SWEEP 0x4001

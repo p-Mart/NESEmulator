@@ -1,5 +1,9 @@
+roms/
+
 *.o
 *.out
 *.nes
+*.py
 MMU_Dump.txt
 PPU_Dump.txt
+debug.txt

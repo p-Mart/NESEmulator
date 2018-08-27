@@ -1,18 +1,17 @@
 #ifndef INSTRUCTIONS_H
 #define INSTRUCTIONS_H
-
 #include <cstdint>
 #include <functional>
 
 // Addressing utility functions
-void immediate(std::function<void (uint8_t*)>);
-void zeropage(std::function<void (uint8_t*)>);
-void zeropageX(std::function<void (uint8_t*)>);
-void absolute(std::function<void (uint8_t*)>);
-void absoluteX(std::function<void (uint8_t*)>);
-void absoluteY(std::function<void (uint8_t*)>);
-void indirectX(std::function<void (uint8_t*)>);
-void indirectY(std::function<void (uint8_t*)>);
+void immediate(std::function<void (uint8_t*, uint16_t*, bool)>);
+void zeropage(std::function<void (uint8_t*, uint16_t*, bool)>);
+void zeropageX(std::function<void (uint8_t*, uint16_t*, bool)>);
+void absolute(std::function<void (uint8_t*, uint16_t*, bool)>);
+void absoluteX(std::function<void (uint8_t*, uint16_t*, bool)>);
+void absoluteY(std::function<void (uint8_t*, uint16_t*, bool)>);
+void indirectX(std::function<void (uint8_t*, uint16_t*, bool)>);
+void indirectY(std::function<void (uint8_t*, uint16_t*, bool)>);
 
 // Naming convention for functions:
 //      (OPCODE)_(ADDRESSINGMODE)
@@ -30,7 +29,7 @@ void indirectY(std::function<void (uint8_t*)>);
 // or it is the base behavior for the function
 
 // ADC - Add with Carry
-void ADC(uint8_t*);
+void ADC(uint8_t*, uint16_t*, bool);
 void ADC_I();
 void ADC_Z();
 void ADC_ZX();
@@ -41,7 +40,7 @@ void ADC_IX();
 void ADC_IY();
 
 // AND - Logical AND
-void AND(uint8_t*);
+void AND(uint8_t*, uint16_t*, bool);
 void AND_I();
 void AND_Z();
 void AND_ZX();
@@ -52,7 +51,7 @@ void AND_IX();
 void AND_IY();
 
 // ASL - Arithmetic Shift Left
-void ASL_BASE(uint8_t*);
+void ASL_BASE(uint8_t*, uint16_t*, bool);
 void ASL(); // This is for accumulator
 void ASL_Z();
 void ASL_ZX();
@@ -72,7 +71,7 @@ void BCS();
 void BEQ();
 
 // BIT - Bit Test
-void BIT(uint8_t*);
+void BIT(uint8_t*, uint16_t*, bool);
 void BIT_Z();
 void BIT_A();
 
@@ -107,7 +106,7 @@ void CLI();
 void CLV();
 
 // CMP - Compare
-void CMP(uint8_t*);
+void CMP(uint8_t*, uint16_t*, bool);
 void CMP_I();
 void CMP_Z();
 void CMP_ZX();
@@ -118,19 +117,19 @@ void CMP_IX();
 void CMP_IY();
 
 // CPX - Compare X Register
-void CPX(uint8_t*);
+void CPX(uint8_t*, uint16_t*, bool);
 void CPX_I();
 void CPX_Z();
 void CPX_A();
 
 // CPY - Compare Y Register
-void CPY(uint8_t*);
+void CPY(uint8_t*, uint16_t*, bool);
 void CPY_I();
 void CPY_Z();
 void CPY_A();
 
 // DEC - Decrement Memory
-void DEC(uint8_t*);
+void DEC(uint8_t*, uint16_t*, bool);
 void DEC_Z();
 void DEC_ZX();
 void DEC_A();
@@ -143,7 +142,7 @@ void DEX();
 void DEY();
 
 // EOR - Exclusive OR
-void EOR(uint8_t*);
+void EOR(uint8_t*, uint16_t*, bool);
 void EOR_I();
 void EOR_Z();
 void EOR_ZX();
@@ -154,7 +153,7 @@ void EOR_IX();
 void EOR_IY();
 
 // INC - Increment Memory
-void INC(uint8_t*);
+void INC(uint8_t*, uint16_t*, bool);
 void INC_Z();
 void INC_ZX();
 void INC_A();
@@ -175,7 +174,7 @@ void JMP_I(); // NOTE: This is for INDIRECT addressing (only JMP does this)
 void JSR(); // Absolute addressing only
 
 // LDA - Load Accumulator
-void LDA(uint8_t*);
+void LDA(uint8_t*, uint16_t*, bool);
 void LDA_I();
 void LDA_Z();
 void LDA_ZX();
@@ -186,7 +185,7 @@ void LDA_IX();
 void LDA_IY();
 
 // LDX - Load X Register
-void LDX(uint8_t*);
+void LDX(uint8_t*, uint16_t*, bool);
 void LDX_I();
 void LDX_Z();
 void LDX_ZY(); 
@@ -194,7 +193,7 @@ void LDX_A();
 void LDX_AY();
 
 // LDY - Load Y Register
-void LDY(uint8_t*);
+void LDY(uint8_t*, uint16_t*, bool);
 void LDY_I();
 void LDY_Z();
 void LDY_ZX(); 
@@ -202,7 +201,7 @@ void LDY_A();
 void LDY_AX();
 
 // LSR - Logical Shift Right
-void LSR_BASE(uint8_t*);
+void LSR_BASE(uint8_t*, uint16_t*, bool);
 void LSR();
 void LSR_Z();
 void LSR_ZX();
@@ -213,7 +212,7 @@ void LSR_AX();
 void NOP();
 
 // ORA - Logical Inclusive OR
-void ORA(uint8_t*);
+void ORA(uint8_t*, uint16_t*, bool);
 void ORA_I();
 void ORA_Z();
 void ORA_ZX();
@@ -236,7 +235,7 @@ void PLA();
 void PLP();
 
 // ROL - Rotate Left
-void ROL_BASE(uint8_t*);
+void ROL_BASE(uint8_t*, uint16_t*, bool);
 void ROL();
 void ROL_Z();
 void ROL_ZX();
@@ -244,7 +243,7 @@ void ROL_A();
 void ROL_AX();
 
 // ROR - Rotate Right
-void ROR_BASE(uint8_t*);
+void ROR_BASE(uint8_t*, uint16_t*, bool);
 void ROR();
 void ROR_Z();
 void ROR_ZX();
@@ -258,7 +257,7 @@ void RTI();
 void RTS();
 
 // SBC - Subtract with Carry
-void SBC(uint8_t*);
+void SBC(uint8_t*, uint16_t*, bool);
 void SBC_I();
 void SBC_Z();
 void SBC_ZX();
@@ -278,7 +277,7 @@ void SED();
 void SEI();
 
 // STA - Store Accumulator
-void STA(uint8_t*);
+void STA(uint8_t*, uint16_t*, bool);
 void STA_Z();
 void STA_ZX();
 void STA_A();
@@ -288,13 +287,13 @@ void STA_IX();
 void STA_IY();
 
 // STX - Store X Register
-void STX(uint8_t*);
+void STX(uint8_t*, uint16_t*, bool);
 void STX_Z();
 void STX_ZY();
 void STX_A();
 
 // STY - Store Y Register
-void STY(uint8_t*);
+void STY(uint8_t*, uint16_t*, bool);
 void STY_Z();
 void STY_ZX();
 void STY_A();

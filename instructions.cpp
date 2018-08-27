@@ -14,50 +14,74 @@ using namespace std;
 // Immediate addressing - take a 1 Byte constant
 // at the next byte in the program and pass that
 // to the calling instruction
-void immediate(std::function<void (uint8_t*)> f){
+void immediate(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint8_t* value = CPU::getInstance()->nextByte();
-    f(value);
+    uint16_t dummy_address = 0;
+
+    #ifndef NDEBUG
+    printf("Immediate: %02X\n", *value);
+    #endif
+
+    f(value, &dummy_address, false);
 }
 
 // Zero Page addressing - take a 1 Byte address
 // and read from zero page memory (0x0000 - 0x00FF),
 // then passing that value to the calling instruction
-void zeropage(std::function<void (uint8_t*)> f){
+void zeropage(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint8_t address;
     uint8_t *value;
+    uint16_t address_wide = 0;
     address = *CPU::getInstance()->nextByte();
     value = MMU::getInstance()->read(&address);
+    address_wide += address;
 
-    f(value);
+    #ifndef NDEBUG
+    printf("Zeropage address: %02X\n", address);
+    #endif
+
+    f(value, &address_wide, true);
 }
 
 // Zero Page, X - take a 1 Byte address, then add
 // the current value of the X register to it. This value
 // is used as an address into zero page memory, the
 // read of which address is passed to the calling function
-void zeropageX(std::function<void (uint8_t*)> f){
+void zeropageX(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint8_t address = 0;
     uint8_t* value;
+    uint16_t address_wide = 0;
     address += *CPU::getInstance()->nextByte();
     address += CPU::getInstance()->X;
     value = MMU::getInstance()->read(&address);
+    address_wide += address;
 
-    f(value);
+    #ifndef NDEBUG
+    printf("ZeropageX address: %02X\n", address);
+    #endif
+
+    f(value, &address_wide, true);
 }
 
-void zeropageY(std::function<void (uint8_t*)> f){
+void zeropageY(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint8_t address = 0;
     uint8_t* value;
+    uint16_t address_wide = 0;
     address += *CPU::getInstance()->nextByte();
     address += CPU::getInstance()->Y;
     value = MMU::getInstance()->read(&address);
+    address_wide += address;
 
-    f(value);
+    #ifndef NDEBUG
+    printf("ZeropageY address: %02X\n", address);
+    #endif
+
+    f(value, &address_wide, true);
 }
 
 // Absolute address - take a 2 Byte address
 // and pass this to the calling function
-void absolute(std::function<void (uint8_t*)> f){
+void absolute(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint16_t address = 0;
     uint8_t* value;
 
@@ -65,10 +89,14 @@ void absolute(std::function<void (uint8_t*)> f){
     address += *CPU::getInstance()->nextByte() * 16 * 16;
     value = MMU::getInstance()->read(&address);
 
-    f(value);
+    #ifndef NDEBUG
+    printf("Absolute address: %04X\n", address);
+    #endif
+
+    f(value, &address, true);
 }
 
-void absoluteX(std::function<void (uint8_t*)> f){
+void absoluteX(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint16_t address = 0;
     uint8_t *value;
     address += *CPU::getInstance()->nextByte();
@@ -76,10 +104,14 @@ void absoluteX(std::function<void (uint8_t*)> f){
     address += CPU::getInstance()->X;
     value = MMU::getInstance()->read(&address);
 
-    f(value);
+    #ifndef NDEBUG
+    printf("AbsoluteX address: %04X\n", address);
+    #endif
+
+    f(value, &address, true);
 }
 
-void absoluteY(std::function<void (uint8_t*)> f){
+void absoluteY(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint16_t address = 0;
     uint8_t *value;
     address += *CPU::getInstance()->nextByte();
@@ -87,10 +119,14 @@ void absoluteY(std::function<void (uint8_t*)> f){
     address += CPU::getInstance()->Y;
     value = MMU::getInstance()->read(&address);
 
-    f(value);
+    #ifndef NDEBUG
+    printf("AbsoluteY address: %04X\n", address);
+    #endif
+
+    f(value, &address, true);
 }
 
-void indirectX(std::function<void (uint8_t*)> f){
+void indirectX(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint8_t indirect_address = 0;
     uint16_t target_address = 0;
     uint8_t *value;
@@ -102,10 +138,14 @@ void indirectX(std::function<void (uint8_t*)> f){
     target_address += *MMU::getInstance()->read(&indirect_address) * 16 * 16;
     value = MMU::getInstance()->read(&target_address);
 
-    f(value);
+    #ifndef NDEBUG
+    printf("IndirectX address: %04X\n", target_address);
+    #endif
+
+    f(value, &target_address, true);
 }
 
-void indirectY(std::function<void (uint8_t*)> f){
+void indirectY(std::function<void (uint8_t*, uint16_t*, bool)> f){
     uint8_t indirect_address = 0;
     uint16_t target_address = 0;
     uint8_t *value;
@@ -117,12 +157,16 @@ void indirectY(std::function<void (uint8_t*)> f){
     target_address += CPU::getInstance()->Y;
     value = MMU::getInstance()->read(&target_address);
 
-    f(value);
+    #ifndef NDEBUG
+    printf("IndirectY address: %04X\n", target_address);
+    #endif
+
+    f(value, &target_address, true);
 }
 
 // ADC - Add with Carry
 // Base behavior for ADC instruction
-void ADC(uint8_t *value){
+void ADC(uint8_t *value, uint16_t *dummy_address, bool use_address){
     uint8_t prior_A = CPU::getInstance()->A;
     CPU::getInstance()->A = CPU::getInstance()->A + *value + CPU::getInstance()->getStatusBit(C);
     
@@ -182,7 +226,7 @@ void ADC_IY(){
 }
 
 // AND - Logical AND
-void AND(uint8_t *value){
+void AND(uint8_t *value, uint16_t *dummy_address, bool use_address){
     CPU::getInstance()->A = CPU::getInstance()->A & *value;
     
     // Set processor status
@@ -226,13 +270,21 @@ void AND_IY(){
 }
 
 // ASL - Arithmetic Shift Left
-void ASL_BASE(uint8_t* value){
+void ASL_BASE(uint8_t* value, uint16_t* address, bool use_address){
     uint8_t prior_value = *value;
-    *value <<= 1;
+    uint8_t new_value = *value;
+
+    if (use_address == false){
+        *value <<= 1;
+        new_value = *value;
+    }else{
+        new_value <<= 1;
+        MMU::getInstance()->write(address, &new_value);
+    }
     
     // Set processor status
     // Negative flag
-    if ((*value & 0x80) == 0x80){
+    if ((new_value & 0x80) == 0x80){
         CPU::getInstance()->setStatusBit(N);
     }else{
         CPU::getInstance()->clearStatusBit(N);
@@ -253,7 +305,7 @@ void ASL_BASE(uint8_t* value){
     }
 }
 void ASL(){
-    ASL_BASE(&(CPU::getInstance()->A));
+    ASL_BASE(&(CPU::getInstance()->A), nullptr, false);
 }
 void ASL_Z(){
     zeropage(ASL_BASE);
@@ -307,13 +359,10 @@ void BEQ(){
 }
 
 // BIT - Bit Test
-void BIT(uint8_t* value){
+void BIT(uint8_t* value, uint16_t* address, bool use_address){
     // AND the A register with a value in memory
     // but dont store the result -- just set the zero
     // flag.
-    int meme = 0;
-    meme += *value;
-    std::cout << meme << std::endl;
     uint8_t result = *value & CPU::getInstance()->A;
 
     if (result == 0x00){
@@ -367,11 +416,9 @@ void BNE(){
 
 // BPL - Branch if Positive
 void BPL(){
-    int meme = 0;
     int8_t offset = 0;
     offset += *CPU::getInstance()->nextByte();
-    meme += offset;
-    std::cout << meme << std::endl;
+
     
     if(CPU::getInstance()->getStatusBit(N) == 0){
         BRANCH(&offset);
@@ -431,7 +478,7 @@ void CLV(){
 }
 
 // CMP - Compare
-void CMP(uint8_t* value){
+void CMP(uint8_t* value, uint16_t* address, bool use_address){
     uint8_t result = (CPU::getInstance()->A == *value);
 
     if (result == 0x00){
@@ -478,7 +525,7 @@ void CMP_IY(){
 }
 
 // CPX - Compare X Register
-void CPX(uint8_t* value){
+void CPX(uint8_t* value, uint16_t* address, bool use_address){
     
     uint8_t result = (CPU::getInstance()->X == *value);
 
@@ -511,7 +558,7 @@ void CPX_A(){
 }
 
 // CPY - Compare Y Register
-void CPY(uint8_t* value){
+void CPY(uint8_t* value, uint16_t* address, bool use_address){
     uint8_t result = (CPU::getInstance()->Y == *value);
 
     if (result == 0x00){
@@ -543,10 +590,15 @@ void CPY_A(){
 }
 
 // DEC - Decrement Memory
-void DEC(uint8_t* value){
-    uint8_t result;
-    *value = *value - 1;
-    result = *value;
+void DEC(uint8_t* value, uint16_t* address, bool use_address){
+    uint8_t result = *value;
+    if(use_address == false){
+        *value = *value - 1;
+        result = *value;
+    }else{
+        result -= 1;
+        MMU::getInstance()->write(address, &result);
+    }
 
     if (result == 0x00){
         CPU::getInstance()->setStatusBit(Z);
@@ -608,7 +660,7 @@ void DEY(){
 }
 
 // EOR - Exclusive OR
-void EOR(uint8_t *value){
+void EOR(uint8_t *value, uint16_t* address, bool use_address){
     CPU::getInstance()->A = CPU::getInstance()->A ^ *value;
     
     // Set processor status
@@ -652,10 +704,15 @@ void EOR_IY(){
 }
 
 // INC - Increment Memory
-void INC(uint8_t* value){
-    uint8_t result;
-    *value = *value + 1;
-    result = *value;
+void INC(uint8_t* value, uint16_t* address, bool use_address){
+    uint8_t result = *value;
+    if(use_address == false){
+        *value = *value + 1;
+        result = *value;
+    }else{
+        result += 1;
+        MMU::getInstance()->write(address, &result);
+    }
 
     if (result == 0x00){
         CPU::getInstance()->setStatusBit(Z);
@@ -725,7 +782,9 @@ void JMP_A(){
     address += *CPU::getInstance()->nextByte();
     address += *CPU::getInstance()->nextByte() * 16 * 16;
 
-    CPU::getInstance()->PC = address;
+    // Set PC to one before the target address, because PC gets incremented
+    // by 1 after every instruction runs
+    CPU::getInstance()->PC = address - 1;
 }
 // This is indirect addressing, not immediate
 void JMP_I(){
@@ -739,13 +798,16 @@ void JMP_I(){
     indirect_address += 1;
     target_address += *MMU::getInstance()->read(&indirect_address) * 16 * 16;
 
-    CPU::getInstance()->PC = target_address;
+    // Set PC to one before the target address, because PC gets incremented
+    // by 1 after every instruction runs
+    CPU::getInstance()->PC = target_address - 1;
 }
 
 // JSR - Jump to Subroutine
 void JSR(){
-    // Push current address - 1 on to stack as a return point
-    uint16_t return_point = CPU::getInstance()->PC - 1;
+    // Push current address+2 on to stack as a return point
+    // (the next instruction is the return point)
+    uint16_t return_point = CPU::getInstance()->PC + 2;
     CPU::getInstance()->pushStack(&return_point);
 
     // Set PC to target address
@@ -753,7 +815,7 @@ void JSR(){
 }
 
 // LDA - Load Accumulator
-void LDA(uint8_t *value){
+void LDA(uint8_t *value, uint16_t* address, bool use_address){
     CPU::getInstance()->A = *value;
 
     if (CPU::getInstance()->A == 0x00){
@@ -794,7 +856,7 @@ void LDA_IY(){
 }
 
 // LDX - Load X Register
-void LDX(uint8_t* value){
+void LDX(uint8_t* value, uint16_t* address, bool use_address){
     CPU::getInstance()->X = *value;
 
     if (CPU::getInstance()->X == 0x00){
@@ -826,7 +888,7 @@ void LDX_AY(){
 }
 
 // LDY - Load Y Register
-void LDY(uint8_t *value){
+void LDY(uint8_t *value, uint16_t* address, bool use_address){
     CPU::getInstance()->Y = *value;
 
     if (CPU::getInstance()->Y == 0x00){
@@ -858,20 +920,28 @@ void LDY_AX(){
 }
 
 // LSR - Logical Shift Right
-void LSR_BASE(uint8_t *value){
+void LSR_BASE(uint8_t *value, uint16_t* address, bool use_address){
     uint8_t prior_value = *value;
-    *value >>= 1;
+    uint8_t new_value = *value;
+
+    if (use_address == false){
+        *value >>= 1;
+        new_value = *value;
+    }else{
+        new_value >>= 1;
+        MMU::getInstance()->write(address, &new_value);
+    }
     
     // Set processor status
     // Negative flag
-    if ((*value & 0x80) == 0x80){
+    if ((new_value & 0x80) == 0x80){
         CPU::getInstance()->setStatusBit(N);
     }else{
         CPU::getInstance()->clearStatusBit(N);
     }
     
     // Zero flag
-    if (*value == 0){
+    if (new_value == 0){
         CPU::getInstance()->setStatusBit(Z);
     }else{
         CPU::getInstance()->clearStatusBit(Z);
@@ -886,7 +956,7 @@ void LSR_BASE(uint8_t *value){
 }
 
 void LSR(){
-    LSR_BASE(&(CPU::getInstance()->A));
+    LSR_BASE(&(CPU::getInstance()->A), nullptr, false);
 }
 void LSR_Z(){
     zeropage(LSR_BASE);
@@ -905,7 +975,7 @@ void LSR_AX(){
 void NOP(){}
 
 // ORA - Logical Inclusive OR
-void ORA(uint8_t *value){
+void ORA(uint8_t *value, uint16_t* address, bool use_address){
     CPU::getInstance()->A = CPU::getInstance()->A | *value;
     
     // Set processor status
@@ -981,20 +1051,29 @@ void PLP(){
 }
 
 // ROL - Rotate Left
-void ROL_BASE(uint8_t *value){
+void ROL_BASE(uint8_t *value, uint16_t* address, bool use_address){
     uint8_t prior_value=  *value;
-    *value = (*value << 1) | (*value >> 7);
+    uint8_t new_value = *value;
+    if(use_address == false){
+        *value = *value << 1;
+        *value = *value | CPU::getInstance()->getStatusBit(C);
+        new_value = *value;
+    }else{
+        new_value = new_value << 1;
+        new_value = new_value | CPU::getInstance()->getStatusBit(C);
+        MMU::getInstance()->write(address, &new_value);
+    }
 
     // Set processor status
     // Negative flag
-    if ((*value & 0x80) == 0x80){
+    if ((new_value & 0x80) == 0x80){
         CPU::getInstance()->setStatusBit(N);
     }else{
         CPU::getInstance()->clearStatusBit(N);
     }
     
     // Zero flag
-    if (*value == 0){
+    if (new_value == 0){
         CPU::getInstance()->setStatusBit(Z);
     }else{
         CPU::getInstance()->clearStatusBit(Z);
@@ -1008,7 +1087,7 @@ void ROL_BASE(uint8_t *value){
     }
 }
 void ROL(){
-    ROL_BASE(&(CPU::getInstance()->A));
+    ROL_BASE(&(CPU::getInstance()->A), nullptr, false);
 }
 void ROL_Z(){
     zeropage(ROL_BASE);
@@ -1024,20 +1103,29 @@ void ROL_AX(){
 }
 
 // ROR - Rotate Right
-void ROR_BASE(uint8_t *value){
+void ROR_BASE(uint8_t *value, uint16_t* address, bool use_address){
     uint8_t prior_value = *value;
-    *value = (*value >> 1) | (*value << 7);
+    uint8_t new_value = *value;
+    if(use_address == false){
+        *value = *value >> 1;
+        *value = *value | (CPU::getInstance()->getStatusBit(C) << 7);
+        new_value = *value;
+    }else{
+        new_value = new_value >> 1;
+        new_value = new_value | (CPU::getInstance()->getStatusBit(C) << 7);
+        MMU::getInstance()->write(address, &new_value);
+    }
 
     // Set processor status
     // Negative flag
-    if ((*value & 0x80) == 0x80){
+    if ((new_value & 0x80) == 0x80){
         CPU::getInstance()->setStatusBit(N);
     }else{
         CPU::getInstance()->clearStatusBit(N);
     }
     
     // Zero flag
-    if (*value == 0){
+    if (new_value == 0){
         CPU::getInstance()->setStatusBit(Z);
     }else{
         CPU::getInstance()->clearStatusBit(Z);
@@ -1051,7 +1139,7 @@ void ROR_BASE(uint8_t *value){
     }
 }
 void ROR(){
-    ROR_BASE(&(CPU::getInstance()->A));
+    ROR_BASE(&(CPU::getInstance()->A), nullptr, false);
 }
 void ROR_Z(){
     zeropage(ROR_BASE);
@@ -1069,16 +1157,20 @@ void ROR_AX(){
 // RTI - Return from Interrupt
 void RTI(){
     CPU::getInstance()->P = *CPU::getInstance()->popStack();
-    CPU::getInstance()->PC = *CPU::getInstance()->popStack();
+    CPU::getInstance()->PC = 0;
+    CPU::getInstance()->PC += *CPU::getInstance()->popStack();
+    CPU::getInstance()->PC += *CPU::getInstance()->popStack() * 16 * 16;
 }
 
 // RTS - Return from Subroutine
 void RTS(){
-    CPU::getInstance()->PC = *CPU::getInstance()->popStack();
+    CPU::getInstance()->PC = 0;
+    CPU::getInstance()->PC += *CPU::getInstance()->popStack();
+    CPU::getInstance()->PC += *CPU::getInstance()->popStack() * 16 * 16;
 }
 
 // SBC - Subtract with Carry
-void SBC(uint8_t *value){
+void SBC(uint8_t *value, uint16_t* address, bool use_address){
     // TODO : verify status bits
     uint8_t prior_A = CPU::getInstance()->A;
     CPU::getInstance()->A = CPU::getInstance()->A - *value - (1 - CPU::getInstance()->getStatusBit(C));
@@ -1154,8 +1246,12 @@ void SEI(){
 }
 
 // STA - Store Accumulator
-void STA(uint8_t *value){
-    *value = CPU::getInstance()->A;
+void STA(uint8_t *value, uint16_t* address, bool use_address){
+    if(use_address == false){
+        *value = CPU::getInstance()->A;
+    }else{
+        MMU::getInstance()->write(address, &(CPU::getInstance()->A));
+    }
 }
 void STA_Z(){
     zeropage(STA);
@@ -1180,8 +1276,12 @@ void STA_IY(){
 }
 
 // STX - Store X Register
-void STX(uint8_t *value){
-    *value = CPU::getInstance()->X;
+void STX(uint8_t *value, uint16_t* address, bool use_address){
+    if(use_address == false){
+        *value = CPU::getInstance()->X;
+    }else{
+        MMU::getInstance()->write(address, &(CPU::getInstance()->X));
+    }
 }
 void STX_Z(){
     zeropage(STX);
@@ -1194,8 +1294,12 @@ void STX_A(){
 }
 
 // STY - Store Y Register
-void STY(uint8_t *value){
-    *value = CPU::getInstance()->Y;
+void STY(uint8_t *value, uint16_t* address, bool use_address){
+    if(use_address == false){
+        *value = CPU::getInstance()->Y;
+    }else{
+        MMU::getInstance()->write(address, &(CPU::getInstance()->Y));
+    }
 }
 void STY_Z(){
     zeropage(STY);
