@@ -4,6 +4,8 @@ roms/
 *.out
 *.nes
 *.py
+*.sh
+*.txt
 MMU_Dump.txt
 PPU_Dump.txt
 debug.txt

@@ -19,52 +19,75 @@ MMU* MMU::getInstance(){
 
 // Read from anywhere in memory (4B addresses)
 uint8_t *MMU::read(uint16_t *address){
-
+    
+    uint16_t hardware_address = *address;
     // RAM Mirroring
-    if(*address >= INTERNAL_MEMORY_START && *address <= INTERNAL_MEMORY_END){
+    if(hardware_address >= INTERNAL_MEMORY_START && hardware_address <= INTERNAL_MEMORY_END){
         // Bytes 0x0000 - 0x07FF are mirrored to address 0x1FFF
-        *address = (*address % (INTERNAL_MEMORY_END - INTERNAL_MEMORY_START + 1));
+        hardware_address = (hardware_address % (INTERNAL_MEMORY_END - INTERNAL_MEMORY_START + 1));
     }
 
     // PPU I/O reads
-    if(*address >= PPU_START && *address <= PPU_MIRRORS_END){
+    if(hardware_address >= PPU_START && hardware_address <= PPU_MIRRORS_END){
         // Emulate mirrored addresses by performing a modulus
-        *address = (*address % 8) + PPU_START;
+        hardware_address = (hardware_address % 8) + PPU_START;
 
 
         #ifndef NDEBUG
-        if(*address == 0x2000){
-            std::cout << "PPU CTRL read detected" << std::endl;
+            if(hardware_address == 0x2000){
+                std::cout << "PPU CTRL read detected" << std::endl;
+            }
+            if(hardware_address == 0x2001){
+                std::cout << "PPU MASK read detected" << std::endl;
+            }
+            if(hardware_address == 0x2002){
+                std::cout << "PPU STATUS read detected" << std::endl;
+            }
+            if(hardware_address == 0x2003){
+                std::cout << "OAM ADDR read detected" << std::endl;
+            }
+            if(hardware_address == 0x2004){
+                std::cout << "OAM DATA read detected" << std::endl;
+            }
+            if(hardware_address == 0x2005){
+                std::cout << "PPU SCROLL read detected" << std::endl;
+            }
+            if(hardware_address == 0x2006){
+                std::cout << "PPU ADDR read detected" << std::endl;
+            }
+            if(hardware_address == 0x2007){
+                std::cout << "PPU DATA read detected" << std::endl;
+            }
+
+        #endif
+
+        if(hardware_address == PPU_STATUS){
+            // NMI_occurred bit needs to be set off on read here
+            // I would've just manipulated it right here, but it
+            // was at this moment I learned that there was no
+            // straightforward way of returning a reference to
+            // a local variable since I needed a copy of the Status
+            // register prior to changing it
+            PPU::getInstance()->statusRead();
         }
-        if(*address == 0x2001){
-            std::cout << "PPU MASK read detected" << std::endl;
+    }
+
+    #ifndef NDEBUG
+        if(hardware_address == DMC_FREQ){
+            std::cout << "DMC FREQ Write read detected" << std::endl;
         }
-        if(*address == 0x2002){
-            std::cout << "PPU STATUS read detected" << std::endl;
+        if(hardware_address == JOY2){
+            std::cout << "JOY2 / APU FRAME CONTROL read detected" << std::endl;
         }
-        if(*address == 0x2003){
-            std::cout << "OAM ADDR read detected" << std::endl;
-        }
-        if(*address == 0x2004){
-            std::cout << "OAM DATA read detected" << std::endl;
-        }
-        if(*address == 0x2005){
-            std::cout << "PPU SCROLL read detected" << std::endl;
-        }
-        if(*address == 0x2006){
-            std::cout << "PPU ADDR read detected" << std::endl;
-        }
-        if(*address == 0x2007){
-            std::cout << "PPU DATA read detected" << std::endl;
-        }
-        if(*address == 0x4014){
+        if(hardware_address == OAMDMA){
             std::cout << "OAM DMA read detected" << std::endl;
+        }
+        if(hardware_address == JOY1){
+            std::cout << "JOY1 read detected" <<std::endl;
         }
     #endif
 
-    }
-
-    return &memory[*address];
+    return &memory[hardware_address];
 }
 
 // Read at Zero-page location
@@ -83,59 +106,59 @@ uint8_t *MMU::readStack(uint8_t *stack_pointer){
 // Full Memory access (4B addresses)
 void MMU::write(uint16_t *address, uint8_t *value){
 
+    uint16_t hardware_address = *address;
     // Detect CHR-ROM Bank switching via Memory Mapper
 
     // RAM Mirroring
-    if(*address >= INTERNAL_MEMORY_START && *address <= INTERNAL_MEMORY_END){
+    if(hardware_address >= INTERNAL_MEMORY_START && hardware_address <= INTERNAL_MEMORY_END){
         // Bytes 0x0000 - 0x07FF are mirrored to address 0x1FFF
-        *address = (*address % (INTERNAL_MEMORY_END - INTERNAL_MEMORY_START + 1));
-        memory[*address] = *value;
+        hardware_address = (hardware_address % (INTERNAL_MEMORY_END - INTERNAL_MEMORY_START + 1));
+        memory[hardware_address] = *value;
         return;
     }
 
     // PPU I/O writes
-    if(*address >= PPU_START && *address <= PPU_MIRRORS_END){
+    if(hardware_address >= PPU_START && hardware_address <= PPU_MIRRORS_END){
 
         // Emulate mirrored addresses by performing a modulus
-        *address = (*address % 8) + PPU_START;
+        hardware_address = (hardware_address % 8) + PPU_START;
 
         #ifndef NDEBUG
-            std::cout << "PPU write modified address: " << *address << std::endl;
-            if(*address == 0x2000){
+            if(hardware_address == 0x2000){
                 std::cout << "PPU CTRL write detected with value: " << +(*value) << std::endl;
             }
-            if(*address == 0x2001){
+            if(hardware_address == 0x2001){
                 std::cout << "PPU MASK write detected with value: " << +(*value) << std::endl;
             }
-            if(*address == 0x2002){
+            if(hardware_address == 0x2002){
                 std::cout << "PPU STATUS write detected with value: " << +(*value) << std::endl;
             }
-            if(*address == 0x2003){
+            if(hardware_address == 0x2003){
                 std::cout << "OAM ADDR write detected with value: " << +(*value) << std::endl;
             }
-            if(*address == 0x2004){
+            if(hardware_address == 0x2004){
                 std::cout << "OAM DATA write detected with value: " << +(*value) << std::endl;
             }
-            if(*address == 0x2005){
+            if(hardware_address == 0x2005){
                 std::cout << "PPU SCROLL write detected with value: " << +(*value) << std::endl;
             }
-            if(*address == 0x2006){
+            if(hardware_address == 0x2006){
                 std::cout << "PPU ADDR write detected with value: " << +(*value) << std::endl;
             }
-            if(*address == 0x2007){
+            if(hardware_address == 0x2007){
                 std::cout << "PPU DATA write detected with value: " << +(*value) << std::endl;
             }
-            if(*address == 0x4014){
+            if(hardware_address == 0x4014){
                 std::cout << "OAM DMA write detected with value: " << +(*value) << std::endl;
             }
         #endif
 
             // Override MMU write into CPU memory
-            if (*address == PPU_ADDR){
+            if (hardware_address == PPU_ADDR){
                 PPU::getInstance()->addrPort(value);
                 return;
             }
-            if (*address == PPU_DATA){
+            if (hardware_address == PPU_DATA){
                 PPU::getInstance()->dataPort(value);
                 return;
             }
@@ -144,7 +167,26 @@ void MMU::write(uint16_t *address, uint8_t *value){
         //PPU::getInstance()->write(address, value);
     }
 
-    memory[*address] = *value;
+
+
+
+    // APU I/O Writes
+    #ifndef NDEBUG
+        if(hardware_address == DMC_FREQ){
+            std::cout << "DMC FREQ Write detected with value: " << +(*value) << std::endl;
+        }
+        if(hardware_address == JOY2){
+            std::cout << "JOY2 / APU FRAME CONTROL Write detected with value: " << +(*value) << std::endl;
+        }
+        if(hardware_address == OAMDMA){
+            std::cout << "OAM DMA write detected with value: " << +(*value) << std::endl;
+        }
+        if(hardware_address == JOY1){
+            std::cout << "JOY1 write detected with value: " << +(*value) << std::endl;
+        }
+    #endif
+
+    memory[hardware_address] = *value;
 }
 
 // Zero-page writes (2B addresses)
@@ -184,4 +226,17 @@ void MMU::memDump(){
     }
 
     dumpfile.close();
+}
+
+// This is needed to link the ports of PPU to the "registers" in
+// MMU
+// If read() was used, which normally alerts the PPU of certain
+// operations, it recursively can create PPU classes during 
+// the PPU initialization. There's probably a nicer solution!
+uint8_t *MMU::readPort(uint16_t *address){
+     if(*address >= PPU_START && *address <= PPU_MIRRORS_END){
+        return &memory[*address];
+     }else{
+        throw "readPort(): address is not from 0x2000 .. 0x2008";
+     }
 }

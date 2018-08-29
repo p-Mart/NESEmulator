@@ -28,7 +28,6 @@ CPU::CPU(){
 
     // Initialize PPU (move to NES class?)
     PPU::getInstance();
-
 }
 
 CPU* CPU::getInstance(){
@@ -45,25 +44,25 @@ uint8_t CPU::getStatusBit(uint8_t bit){
 
     switch (bit){
         case N: 
-            result = P & 0x80;
+            result = (P & 0x80) >> 7;
             break;
         case V:  
-            result = P & 0x40;
+            result = (P & 0x40) >> 6;
             break;
         case B:
-            result = P & 0x10;
+            result = (P & 0x10) >> 4;
             break;
         case D: 
-            result = P & 0x08;
+            result = (P & 0x08) >> 3;
             break;
         case I:
-            result = P & 0x04;
+            result = (P & 0x04) >> 2;
             break;
         case Z:
-            result = P & 0x02;
+            result = (P & 0x02) >> 1;
             break;
         case C:
-            result = P & 0x01;
+            result = (P & 0x01);
             break;
     }
 
@@ -138,23 +137,29 @@ void CPU::printRegisters(void){
 void CPU::runProgram(){
     uint8_t byte = *MMU::getInstance()->read(&PC);
     int cycles = 0;
-    while(cycles < 20000){
+    while(byte != 0x00){
         byte = *MMU::getInstance()->read(&PC);
         
-        printf("\nOpcode: %02X\n", byte);
+        if((cycles > 100000) && (cycles < 120000)){
+            printf("\nOpcode: %02X\n", byte);
+            printf("Cycle: %d\n", cycles);
+        }
         // Attempt to run byte as opcode
         opcodes[byte](); 
-        printRegisters();
+
+        if((cycles > 100000) && (cycles < 120000)){
+            printRegisters();
+        }
 
         // Increment PC by 1
         PC = PC + 1;
         cycles += 1;
 
-        // PPU Render tick
-        PPU::getInstance()->renderFrame(); 
-
-        // Handle Interrupts
-        //handleInterrupts();
+        // PPU tick
+        // 3 CPU Clocks = 1 PPU Clock
+        for (int i = 0; i < 3; i++){
+            PPU::getInstance()->renderFrame(); 
+        }
     }
 
     #ifndef NDEBUG
@@ -184,9 +189,6 @@ void CPU::loadProgram(string filename){
     test_file.open(filename);
 
     // Extract program into a single string
-    // For some unknown fucking reason, 
-    // this is pulling out the bytes in raw
-    // .nes files I find online. So whatever
     char c;
     int i = 0;
     while(test_file.get(c)){
@@ -293,6 +295,11 @@ void CPU::pushStack(uint16_t *value){
 }
 
 void CPU::interruptNMI(){
+
+    #ifndef NDEBUG
+        printf("NMI Interrupt has occurred\n");
+    #endif
+
     // Push current PC and processor status onto stack, and set the I flag
     pushStack(&PC);
     pushStack(&P);

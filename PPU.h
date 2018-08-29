@@ -49,8 +49,13 @@
 #define RESOLUTION_HEIGHT_NTSC 224
 #define RESOLUTION_HEIGHT_PAL 240
 
+// Timing information
+#define SCANLINES_PER_FRAME 262
+#define SCANLINE_CYCLES 341
+
 // Misc. Drawing info
 #define NUM_TILES 960
+
 
 #include <SDL2/SDL.h>
 #include <cstdint>
@@ -79,6 +84,11 @@ class PPU{
 
     // Latches
     bool address_latch;
+    bool status_read;
+
+    // Cycle and Scanline counter
+    uint16_t cycle;
+    uint16_t scanline;
 
     // System color palette
     const SDL_Color system_palette[64] = {
@@ -159,7 +169,9 @@ class PPU{
         void write(uint8_t*, uint8_t*);
         void addrPort(uint8_t*);
         void dataPort(uint8_t*);
+        void statusRead();
 
+        void tick();
         void renderFrame();
         void renderTile(uint16_t);
 

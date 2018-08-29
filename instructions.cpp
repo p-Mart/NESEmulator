@@ -452,6 +452,9 @@ void BVS(){
     int8_t offset = 0;
     offset += *CPU::getInstance()->nextByte();
     
+    printf("Offset: %d\n", +(offset));
+    printf("Overflow flag: %d\n", +(CPU::getInstance()->getStatusBit(V)));
+
     if(CPU::getInstance()->getStatusBit(V) == 1){
         BRANCH(&offset);
     }
@@ -479,7 +482,7 @@ void CLV(){
 
 // CMP - Compare
 void CMP(uint8_t* value, uint16_t* address, bool use_address){
-    uint8_t result = (CPU::getInstance()->A == *value);
+    uint8_t result = (CPU::getInstance()->A - *value);
 
     if (result == 0x00){
         CPU::getInstance()->setStatusBit(Z);
@@ -1025,7 +1028,7 @@ void PHA(){
 
 // PHP - Push Processor Status
 void PHP(){
-    CPU::getInstance()->pushStack(&(CPU::getInstance()->PC));
+    CPU::getInstance()->pushStack(&(CPU::getInstance()->P));
 }
 
 // PLA - Pull Accumulator
@@ -1160,6 +1163,7 @@ void RTI(){
     CPU::getInstance()->PC = 0;
     CPU::getInstance()->PC += *CPU::getInstance()->popStack();
     CPU::getInstance()->PC += *CPU::getInstance()->popStack() * 16 * 16;
+    CPU::getInstance()->PC -= 1;
 }
 
 // RTS - Return from Subroutine
