@@ -42,9 +42,18 @@ public:
     uint8_t Y;
     uint8_t P;
 
+    // Program info
+    uint8_t n_prgrom_banks;
+    uint8_t n_chrrom_banks;
+    uint8_t control_one;
+    uint8_t control_two;
+    uint8_t n_ram_banks;
+    int mapper;
+
     static CPU* getInstance();
     void clearRegisters();
     uint8_t getStatusBit(uint8_t);
+    int getMapper();
     uint8_t *nextByte();
     void setStatusBit(uint8_t);
     void clearStatusBit(uint8_t);

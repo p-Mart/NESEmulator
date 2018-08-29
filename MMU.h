@@ -77,6 +77,10 @@ class MMU{
         void write(uint8_t*, uint8_t*);
         void writeStack(uint8_t*, uint8_t*);
         uint8_t *readStack(uint8_t*);
+
+        void loadPRGROM(std::vector<uint8_t>&);
+        void loadCHRROM(std::vector<uint8_t>&, uint8_t&);
+
         void memDump();
 };
 

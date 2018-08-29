@@ -26,6 +26,7 @@ CPU::CPU(){
     Y = 0x00;
     P = 0x00;
 
+    mapper = 0;
     // Initialize PPU (move to NES class?)
     PPU::getInstance();
 }
@@ -137,17 +138,17 @@ void CPU::printRegisters(void){
 void CPU::runProgram(){
     uint8_t byte = *MMU::getInstance()->read(&PC);
     int cycles = 0;
-    while(byte != 0x00){
+    while(cycles < 400000){
         byte = *MMU::getInstance()->read(&PC);
         
-        if((cycles > 100000) && (cycles < 120000)){
+        if((cycles > 300000) && (cycles < 400000)){
             printf("\nOpcode: %02X\n", byte);
             printf("Cycle: %d\n", cycles);
         }
         // Attempt to run byte as opcode
         opcodes[byte](); 
 
-        if((cycles > 100000) && (cycles < 120000)){
+        if((cycles > 300000) && (cycles < 400000)){
             printRegisters();
         }
 
@@ -183,9 +184,6 @@ void CPU::loadProgram(string filename){
 
     // Read .nes program
     ifstream test_file;
-    string raw_program;
-
-
     test_file.open(filename);
 
     // Extract program into a single string
@@ -196,7 +194,6 @@ void CPU::loadProgram(string filename){
     }
     test_file.close();
 
-    std::cout << program.size() << std::endl;
     //// Process 16 Byte header
     // For the .ines standard, the first 4 bytes
     // MUST be the following
@@ -206,25 +203,29 @@ void CPU::loadProgram(string filename){
     assert(program[3] == 0x1A);
 
     // Number of 16KB PRG-ROM banks
-    uint8_t n_prgrom_banks = program[4];
+    n_prgrom_banks = program[4];
 
     // Number of 8KB CHR-ROM banks
-    uint8_t n_chrrom_banks = program[5];
+    n_chrrom_banks = program[5];
 
     // First ROM Control Byte
-    uint8_t control_one = program[6];
+    control_one = program[6];
 
     // Second ROM Control Byte
-    uint8_t control_two = program[7];
+    control_two = program[7];
 
     // Number of 8KB RAM Banks
-    uint8_t n_ram_banks = program[8];
+    n_ram_banks = program[8];
 
     // Bytes 9 - 15 should be 0x00
 
     // Get Memory Mapper
+    mapper = control_one >> 4;
+    mapper += (control_two >> 4) * 256;
 
     // Load PRG-ROM into memory
+    MMU::getInstance()->loadPRGROM(program);
+    /*
     uint16_t prg_start = 16; //PRG-ROM starts at byte 16
     uint16_t program_length = 16384 * n_prgrom_banks;
 
@@ -246,14 +247,18 @@ void CPU::loadProgram(string filename){
             MMU::getInstance()->write(&address, &program[prg_start + i]);
         }
     }
-
+    */
     // Load CHR-ROM (Bank 1) into PPU memory
+    /*
     uint16_t chr_start = prg_start + program_length;
     uint16_t chr_length = 8192;
     for(uint16_t i = 0; i < chr_length; i++){
         uint16_t address = PATTERN_TABLE_START + i;
         PPU::getInstance()->write(&address, &program[chr_start + i]);
     }
+    */
+    uint8_t bank_number = 0;
+    MMU::getInstance()->loadCHRROM(program, bank_number);
 
     // Get Interrupt Vectors
     // RESET vector must be at 0xFFFC - 0xFFFD
