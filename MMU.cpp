@@ -189,9 +189,6 @@ void MMU::write(uint16_t *address, uint8_t *value){
     // Right now just assuming UNROM mapper for donkey kong
     if (CPU::getInstance()->mapper == 3){
         if((hardware_address >= 0x8000) & (hardware_address <= 0xFFFF)){
-            #ifndef NDEBUG
-            printf("CHR Bank swap detected: %d\n", +(*value));
-            #endif
             uint8_t bank_number = *value & 0x03;
             loadCHRROM(CPU::getInstance()->program, bank_number);
         }

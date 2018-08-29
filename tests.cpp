@@ -42,8 +42,12 @@ int main(void){
 
     th.registerTest(new UnitTest("Dummy Reads", [&] (){
         cpu->clearRegisters();
-        cpu->loadProgram("roms/donkeykong.nes");
-        cpu->runProgram();
+        cpu->loadProgram("roms/supermariobros.nes");
+        try{
+            cpu->runProgram();
+        }catch (const char * message){
+            printf("Error occurred: %s\n", message);
+        }
 
         return th.checkEqual("255 is 255", 255, 255);
     }));

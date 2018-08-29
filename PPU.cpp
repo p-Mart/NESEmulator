@@ -347,8 +347,7 @@ SDL_Color PPU::getPixelColor(uint8_t palette_low, uint8_t palette_high){
 // that's currently in use
 uint16_t PPU::getCurrentNameTable(){
     uint16_t name_table_addr;
-    uint8_t name_table_bits = *ppu_ctrl;
-    name_table_bits = name_table_bits & 0x03;
+    uint8_t name_table_bits = *ppu_ctrl & 0x03;
     switch (name_table_bits){
         case 0x00:
             name_table_addr = NAME_TABLE_0_START;
@@ -403,8 +402,7 @@ uint16_t PPU::getCurrentAttributeTable(){
 // that's currently in use
 uint16_t PPU::getCurrentPatternTable(){
     uint16_t pattern_table_addr;
-    uint8_t pattern_table_bits = *ppu_ctrl;
-    pattern_table_bits = (pattern_table_bits & 0x08) >> 3;
+    uint8_t pattern_table_bits = (*ppu_ctrl & 0x08) >> 3;
     switch (pattern_table_bits){
         case 0x00:
             pattern_table_addr = PATTERN_TABLE_0_START;
@@ -434,7 +432,7 @@ void PPU::renderTile(uint16_t tile){
     // Calculate the starting address of the tile # in the
     // pattern table
     uint16_t pattern_table_addr = getCurrentPatternTable();
-    pattern_table_addr = pattern_table_addr + (2 * tile_number);
+    pattern_table_addr = pattern_table_addr + (16 * tile_number);
 
     // Get the high bits for palette
     uint8_t palette_high = getPaletteHigh(tile);

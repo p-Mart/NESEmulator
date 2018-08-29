@@ -138,7 +138,7 @@ void CPU::printRegisters(void){
 void CPU::runProgram(){
     uint8_t byte = *MMU::getInstance()->read(&PC);
     int cycles = 0;
-    while(cycles < 400000){
+    while(byte != 0x00){
         byte = *MMU::getInstance()->read(&PC);
         
         if((cycles > 300000) && (cycles < 400000)){
