@@ -211,7 +211,7 @@ void PPU::renderFrame(){
         // Visible scanlines
         if ((cycle > 0) && (cycle < 257)){
             // Render each pixel on the current scanline
-            //renderPixel(cycle);
+            //renderPixel(cycle - 1);
         }
         else if ((cycle >= 257) && (cycle < 321)){
             // Tile data for sprites on next scanline fetched
@@ -422,7 +422,7 @@ uint16_t PPU::getCurrentPatternTable(){
 
 void PPU::renderPixel(uint16_t pixel){
     // Render a pixel on the current scanline
-
+    tile = ((scanline - 1) * pixel) / NUM_TILES;
 }
 
 void PPU::renderTile(uint16_t tile){

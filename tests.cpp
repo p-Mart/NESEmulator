@@ -11,7 +11,9 @@
 
 
 
-int main(void){
+int main(int argc, char *argv[]){
+
+    string input_program = argv[1];
 
     TestHarness th;
     CPU* cpu = CPU::getInstance();
@@ -19,7 +21,7 @@ int main(void){
     
     th.registerTest(new UnitTest("Dummy Reads", [&] (){
         cpu->clearRegisters();
-        cpu->loadProgram("roms/donkeykong.nes");
+        cpu->loadProgram(input_program);
         try{
             cpu->runProgram();
         }catch (const char * message){
