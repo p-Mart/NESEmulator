@@ -422,7 +422,7 @@ uint16_t PPU::getCurrentPatternTable(){
 
 void PPU::renderPixel(uint16_t pixel){
     // Render a pixel on the current scanline
-    tile = ((scanline - 1) * pixel) / NUM_TILES;
+    //tile = ((scanline - 1) * pixel) / NUM_TILES;
 }
 
 void PPU::renderTile(uint16_t tile){

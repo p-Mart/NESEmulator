@@ -13,7 +13,7 @@
 
 int main(int argc, char *argv[]){
 
-    string input_program = argv[1];
+    std::string input_program = argv[1];
 
     TestHarness th;
     CPU* cpu = CPU::getInstance();
