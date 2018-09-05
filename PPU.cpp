@@ -224,6 +224,7 @@ void PPU::renderFrame(){
         }
     }
     else if (scanline == 241 && cycle == 0){
+        // Idle scanline
         // Cheating here - rendering everything all at once
         SDL_RenderClear(ren);
         for(uint16_t tile = 0; tile < NUM_TILES; tile++){
@@ -233,7 +234,7 @@ void PPU::renderFrame(){
     }
     else if ((scanline >= 242) && (scanline < 263)){
         // Vertical blanking scanlines
-        if ((cycle == 1) && (scanline == 241)){
+        if ((cycle == 1) && (scanline == 242)){
              // V-Blank
             *ppu_status = *ppu_status | 0x80;
             // Interrupt if bit 7 is turned on in PPU CTRL

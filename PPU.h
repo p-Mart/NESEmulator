@@ -175,6 +175,7 @@ class PPU{
         void tick();
         void renderFrame();
         void renderTile(uint16_t);
+        void renderPixel(uint16_t);
 
         uint8_t getPaletteHigh(uint16_t);
         uint8_t getPaletteLow(uint8_t,uint8_t,uint8_t);
