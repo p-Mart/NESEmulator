@@ -207,10 +207,11 @@ void PPU::renderFrame(){
         // Disable v-blank occurring flag
         if(cycle == 1) *ppu_status = *ppu_status & 0x1F;
     }
-    else if ((scanline > 0) && (scanline < 240)){
+    else if ((scanline > 0) && (scanline < 241)){
         // Visible scanlines
         if ((cycle > 0) && (cycle < 257)){
             // Render each pixel on the current scanline
+            //renderPixel(cycle);
         }
         else if ((cycle >= 257) && (cycle < 321)){
             // Tile data for sprites on next scanline fetched
@@ -222,7 +223,7 @@ void PPU::renderFrame(){
             // Used in only one memory mapper (MMC5)
         }
     }
-    else if (scanline == 240 && cycle == 0){
+    else if (scanline == 241 && cycle == 0){
         // Cheating here - rendering everything all at once
         SDL_RenderClear(ren);
         for(uint16_t tile = 0; tile < NUM_TILES; tile++){
@@ -230,7 +231,7 @@ void PPU::renderFrame(){
         }
         SDL_RenderPresent(ren);
     }
-    else if ((scanline >= 241) && (scanline < 262)){
+    else if ((scanline >= 242) && (scanline < 263)){
         // Vertical blanking scanlines
         if ((cycle == 1) && (scanline == 241)){
              // V-Blank
@@ -249,7 +250,7 @@ void PPU::renderFrame(){
         scanline++;
         cycle = 0;
     }
-    if(scanline == 262) scanline = 0;
+    if(scanline == 263) scanline = 0;
 
     /*    
     if(cycle < SCANLINE_CYCLES){
@@ -416,6 +417,11 @@ uint16_t PPU::getCurrentPatternTable(){
     }
 
     return pattern_table_addr;
+}
+
+void PPU::renderPixel(uint16_t pixel){
+    // Render a pixel on the current scanline
+
 }
 
 void PPU::renderTile(uint16_t tile){

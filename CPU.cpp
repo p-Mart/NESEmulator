@@ -225,38 +225,8 @@ void CPU::loadProgram(string filename){
 
     // Load PRG-ROM into memory
     MMU::getInstance()->loadPRGROM(program);
-    /*
-    uint16_t prg_start = 16; //PRG-ROM starts at byte 16
-    uint16_t program_length = 16384 * n_prgrom_banks;
 
-    // 1 PRG-ROM -> bank 1 is copied to bank 2
-    if(n_prgrom_banks == 1){
-        for(uint16_t i = 0; i < program_length; i++){
-            uint16_t address = PRG_ROM1_START + i;
-            MMU::getInstance()->write(&address, &program[prg_start + i]);
-        }
-        for(uint16_t i = 0; i < program_length; i++){
-            uint16_t address = PRG_ROM2_START + i;
-            MMU::getInstance()->write(&address, &program[prg_start + i]);
-        }
-    }
-
-    if(n_prgrom_banks == 2){
-        for(uint16_t i = 0; i < program_length; i++){
-            uint16_t address = PRG_ROM1_START + i;
-            MMU::getInstance()->write(&address, &program[prg_start + i]);
-        }
-    }
-    */
-    // Load CHR-ROM (Bank 1) into PPU memory
-    /*
-    uint16_t chr_start = prg_start + program_length;
-    uint16_t chr_length = 8192;
-    for(uint16_t i = 0; i < chr_length; i++){
-        uint16_t address = PATTERN_TABLE_START + i;
-        PPU::getInstance()->write(&address, &program[chr_start + i]);
-    }
-    */
+    // Load CHR-ROM into VRAM bank 0
     uint8_t bank_number = 0;
     MMU::getInstance()->loadCHRROM(program, bank_number);
 

@@ -55,6 +55,7 @@
 
 // Misc. Drawing info
 #define NUM_TILES 960
+#define NUM_PIXELS 61440
 
 
 #include <SDL2/SDL.h>

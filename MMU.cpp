@@ -64,11 +64,6 @@ uint8_t *MMU::read(uint16_t *address){
 
         if(hardware_address == PPU_STATUS){
             // NMI_occurred bit needs to be set off on read here
-            // I would've just manipulated it right here, but it
-            // was at this moment I learned that there was no
-            // straightforward way of returning a reference to
-            // a local variable since I needed a copy of the Status
-            // register prior to changing it
             PPU::getInstance()->statusRead();
         }
     }
