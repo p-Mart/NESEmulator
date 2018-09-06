@@ -178,7 +178,7 @@ class PPU{
         void renderPixel(uint16_t);
 
         uint8_t getPaletteHigh(uint16_t);
-        uint8_t getPaletteLow(uint8_t,uint8_t,uint8_t);
+        uint8_t getPaletteLow(uint8_t,uint8_t,uint16_t);
         uint16_t getCurrentNameTable();
         uint16_t getCurrentAttributeTable();
         uint16_t getCurrentPatternTable();

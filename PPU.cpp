@@ -203,15 +203,17 @@ void PPU::renderFrame(){
 
     // PPU Timing Emulation
     if(scanline == 0){
-        // Pre-render scanlines
-        // Disable v-blank occurring flag
+        // Pre-render scanline
+        // Disable v-blank occurring flag, clear SDL window
         if(cycle == 1) *ppu_status = *ppu_status & 0x1F;
+        SDL_RenderClear(ren);
     }
     else if ((scanline > 0) && (scanline < 241)){
         // Visible scanlines
         if ((cycle > 0) && (cycle < 257)){
-            // Render each pixel on the current scanline
-            //renderPixel(cycle - 1);
+            // Calculate current pixel to be rendered and render it
+            uint16_t pixel = RESOLUTION_WIDTH_NTSC * (scanline - 1) + (cycle - 1);
+            renderPixel(pixel);
         }
         else if ((cycle >= 257) && (cycle < 321)){
             // Tile data for sprites on next scanline fetched
@@ -224,13 +226,10 @@ void PPU::renderFrame(){
         }
     }
     else if (scanline == 241 && cycle == 0){
-        // Idle scanline
-        // Cheating here - rendering everything all at once
-        SDL_RenderClear(ren);
-        for(uint16_t tile = 0; tile < NUM_TILES; tile++){
-            renderTile(tile);
-        }
+        // Idle scanline in hardware, but here I update
+        // the SDL Window
         SDL_RenderPresent(ren);
+        //SDL_Delay(33); 
     }
     else if ((scanline >= 242) && (scanline < 263)){
         // Vertical blanking scanlines
@@ -328,9 +327,9 @@ uint8_t PPU::getPaletteHigh(uint16_t tile){
 // CHR art.
 // Takes in the row # in the CHR art and the
 // pixel in that row.
-uint8_t PPU::getPaletteLow(uint8_t chr_row_low, uint8_t chr_row_high, uint8_t pixel){
-    uint8_t low_bit = ((0x80 >> pixel) & chr_row_low) >> (7 - pixel);
-    uint8_t high_bit = ((0x80 >> pixel) & chr_row_high) >> (7 - pixel);
+uint8_t PPU::getPaletteLow(uint8_t chr_row_low, uint8_t chr_row_high, uint16_t pixel){
+    uint8_t low_bit = ((0x0080 >> pixel) & chr_row_low) >> (7 - pixel);
+    uint8_t high_bit = ((0x0080 >> pixel) & chr_row_high) >> (7 - pixel);
     uint8_t palette_low = (high_bit << 1) | low_bit;
     return palette_low;
 }
@@ -420,11 +419,64 @@ uint16_t PPU::getCurrentPatternTable(){
     return pattern_table_addr;
 }
 
+// Render a pixel on screen
+// where pixel is in [0, NUM_PIXELS - 1]
+// TODO : create pixel struct, with x and y values
+// refactor code accordingly
 void PPU::renderPixel(uint16_t pixel){
-    // Render a pixel on the current scanline
-    //tile = ((scanline - 1) * pixel) / NUM_TILES;
+    // Calculate which tile the pixel belongs to
+    uint16_t tile_x = (pixel % RESOLUTION_WIDTH_NTSC) / 8;
+    uint16_t tile_y = (RESOLUTION_WIDTH_NTSC / 8) * (pixel / (RESOLUTION_WIDTH_NTSC * 8));
+    uint16_t tile = tile_x + tile_y;
+
+    // Get starting address of name table, based on which
+    // name table is being used
+    uint16_t name_table_addr = getCurrentNameTable();
+
+    // Add the tile # to the base name table address to get
+    // the address of this tile in the name table
+    name_table_addr += tile;
+
+    // Read to get the tile value
+    uint8_t tile_value = *read(&name_table_addr);
+
+    // Calculate the starting address of the tile in the
+    // pattern table
+    uint16_t pattern_table_addr = getCurrentPatternTable();
+    uint16_t pixel_row = (pixel / RESOLUTION_WIDTH_NTSC) % 8;
+    pattern_table_addr = pattern_table_addr + (16 * tile_value) + pixel_row;
+
+    // Get the high bits for palette
+    uint8_t palette_high = getPaletteHigh(tile);
+
+    // Get the low bits for the tile in the pattern (chr) table
+    uint8_t chr_low = *read(&pattern_table_addr);
+
+    // Offset by 8 bytes to get the hi part of the tile in the
+    // pattern table
+    uint16_t offset_addr = pattern_table_addr + 0x08;
+    uint8_t chr_hi = *read(&offset_addr);
+
+    // Get which pixel we're on, relative to the current tile
+    // and within the scanline
+    uint16_t pixel_relative = pixel % 8;
+
+    // Get the low bits for palette now
+    uint8_t palette_low = getPaletteLow(chr_low, chr_hi, pixel_relative);
+
+    // Get the actual color via the palette bits
+    SDL_Color pixel_color = getPixelColor(palette_low, palette_high);
+
+    // Get x and y position of the pixel
+    int x = pixel % RESOLUTION_WIDTH_NTSC;
+    int y = pixel / RESOLUTION_WIDTH_NTSC;
+
+    // Finally, render the pixel
+    SDL_SetRenderDrawColor(ren, pixel_color.r, pixel_color.g, pixel_color.b, 0xff);
+    SDL_RenderDrawPoint(ren, x, y);
 }
 
+// Old render function, deprecated
 void PPU::renderTile(uint16_t tile){
     // Get starting address of name table, based on which
     // name table is being used
