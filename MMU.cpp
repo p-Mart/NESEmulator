@@ -150,7 +150,7 @@ void MMU::write(uint16_t *address, uint8_t *value){
             }
         #endif
 
-            // Override MMU write into CPU memory
+            // Redirect write into PPU
             if (hardware_address == PPU_ADDR){
                 PPU::getInstance()->addrPort(value);
                 return;
@@ -159,9 +159,6 @@ void MMU::write(uint16_t *address, uint8_t *value){
                 PPU::getInstance()->dataPort(value);
                 return;
             }
-            
-
-        //PPU::getInstance()->write(address, value);
     }
 
     // APU I/O Writes
@@ -183,7 +180,7 @@ void MMU::write(uint16_t *address, uint8_t *value){
     // Detect Bank-switching for memory mappers
     // Right now just assuming UNROM mapper for donkey kong
     if (CPU::getInstance()->mapper == 3){
-        if((hardware_address >= 0x8000) & (hardware_address <= 0xFFFF)){
+        if((hardware_address >= 0x8000) && (hardware_address <= 0xFFFF)){
             uint8_t bank_number = *value & 0x03;
             loadCHRROM(CPU::getInstance()->program, bank_number);
         }

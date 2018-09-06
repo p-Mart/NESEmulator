@@ -407,7 +407,7 @@ uint16_t PPU::getCurrentAttributeTable(){
 // that's currently in use
 uint16_t PPU::getCurrentPatternTable(){
     uint16_t pattern_table_addr;
-    uint8_t pattern_table_bits = (*ppu_ctrl & 0x08) >> 3;
+    uint8_t pattern_table_bits = (*ppu_ctrl & 0x10) >> 4;
     switch (pattern_table_bits){
         case 0x00:
             pattern_table_addr = PATTERN_TABLE_0_START;
