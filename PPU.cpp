@@ -174,28 +174,7 @@ void PPU::memDump(){
 }
 
 void PPU::tick(){
-
-
-    // Perform one PPU Cycle
-    if(scanline < SCANLINES_PER_FRAME){
-
-        if (cycle < SCANLINE_CYCLES){
-            // Each scanline of rendering takes 341 cycles
-
-            cycle += 1;
-        }else{
-            cycle = 0;
-            scanline += 1;
-        }
-        
-    }else{
-        scanline = 0;
-    }
-}
-
-// Render a frame
-void PPU::renderFrame(){
-
+    // Tick 1 PPU Cycle
     if(status_read){
         *ppu_status = *ppu_status & 0x7F;
         status_read = false;
@@ -226,15 +205,14 @@ void PPU::renderFrame(){
         }
     }
     else if (scanline == 241 && cycle == 0){
-        // Idle scanline in hardware, but here I update
-        // the SDL Window
+        // Idle scanline in hardware, but here I update the SDL Window
         SDL_RenderPresent(ren);
         //SDL_Delay(33); 
     }
     else if ((scanline >= 242) && (scanline < 263)){
         // Vertical blanking scanlines
         if ((cycle == 1) && (scanline == 242)){
-             // V-Blank
+             // V-Blank flag goes high
             *ppu_status = *ppu_status | 0x80;
             // Interrupt if bit 7 is turned on in PPU CTRL
             if ((*ppu_ctrl & 0x80) == 0x80){
@@ -251,27 +229,6 @@ void PPU::renderFrame(){
         cycle = 0;
     }
     if(scanline == 263) scanline = 0;
-
-    /*    
-    if(cycle < SCANLINE_CYCLES){
-        cycle++;
-    }else{
-        cycle = 0;
-
-        SDL_RenderClear(ren);
-        for(uint16_t tile = 0; tile < NUM_TILES; tile++){
-            renderTile(tile);
-        }
-        SDL_RenderPresent(ren);
-        
-        // V-Blank
-        *ppu_status = *ppu_status | 0x80;
-        // Interrupt if bit 7 is turned on in PPU CTRL
-        if ((*ppu_ctrl & 0x80) == 0x80){
-            CPU::getInstance()->interruptNMI();
-        }
-    }
-    */
 }
 
 // Get the upper 2 bits of palette based
@@ -429,13 +386,8 @@ void PPU::renderPixel(uint16_t pixel){
     uint16_t tile_y = (RESOLUTION_WIDTH_NTSC / 8) * (pixel / (RESOLUTION_WIDTH_NTSC * 8));
     uint16_t tile = tile_x + tile_y;
 
-    // Get starting address of name table, based on which
-    // name table is being used
-    uint16_t name_table_addr = getCurrentNameTable();
-
-    // Add the tile # to the base name table address to get
-    // the address of this tile in the name table
-    name_table_addr += tile;
+    // Get address of this tile in the name table
+    uint16_t name_table_addr = getCurrentNameTable() + tile;
 
     // Read to get the tile value
     uint8_t tile_value = *read(&name_table_addr);

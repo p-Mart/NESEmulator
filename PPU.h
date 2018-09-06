@@ -173,7 +173,6 @@ class PPU{
         void statusRead();
 
         void tick();
-        void renderFrame();
         void renderTile(uint16_t);
         void renderPixel(uint16_t);
 

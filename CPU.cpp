@@ -159,7 +159,7 @@ void CPU::runProgram(){
         // PPU tick
         // 3 CPU Clocks = 1 PPU Clock
         for (int i = 0; i < 3; i++){
-            PPU::getInstance()->renderFrame(); 
+            PPU::getInstance()->tick(); 
         }
     }
 
