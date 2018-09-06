@@ -4,6 +4,8 @@
 #include "instructions.h"
 #include "calltable.h"
 
+#include <SDL2/SDL.h>
+
 #include <iostream>
 #include <fstream>
 #include <bitset>
@@ -138,19 +140,20 @@ void CPU::printRegisters(void){
 void CPU::runProgram(){
     uint8_t byte = *MMU::getInstance()->read(&PC);
     int cycles = 0;
-    while(byte != 0x00){
-        byte = *MMU::getInstance()->read(&PC);
-        
-        if((cycles > 300000) && (cycles < 400000)){
-            printf("\nOpcode: %02X\n", byte);
-            printf("Cycle: %d\n", cycles);
-        }
-        // Attempt to run byte as opcode
-        opcodes[byte](); 
+    SDL_Event event;
+    bool exit = false;
+    while((byte != 0x00) && (!exit)){
 
-        if((cycles > 300000) && (cycles < 400000)){
-            printRegisters();
+        // Go through the SDL Event Stack
+        while(SDL_PollEvent(&event)){
+            switch(event.type){
+                case SDL_QUIT: exit = true; break;
+            }
         }
+
+        // Get byte and run as opcode
+        byte = *MMU::getInstance()->read(&PC);
+        opcodes[byte](); 
 
         // Increment PC by 1
         PC = PC + 1;
