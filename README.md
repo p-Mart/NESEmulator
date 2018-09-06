@@ -19,4 +19,4 @@ It's recommended to redirect the output to /dev/null, or something of the sort.
 You can run the emulator by doing:
 ```./RunTests.out [romname].nes > /dev/null```
 
-To close it, use CTRL+C and close the SDL window for the emulator.
+To close it, you can use CTRL+C in terminal or just close the main window.
