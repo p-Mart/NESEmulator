@@ -149,7 +149,6 @@ void PPU::dataPort(uint8_t *value){
     vram_address += increment_amount;
 }
 
-
 void PPU::memDump(){
     std::string dumpfile_name = "PPU_Dump.txt";
     std::ofstream dumpfile;
@@ -306,22 +305,70 @@ SDL_Color PPU::getPixelColor(uint8_t palette_low, uint8_t palette_high){
 uint16_t PPU::getCurrentNameTable(){
     uint16_t name_table_addr;
     uint8_t name_table_bits = *ppu_ctrl & 0x03;
-    switch (name_table_bits){
-        case 0x00:
-            name_table_addr = NAME_TABLE_0_START;
-            break;
-        case 0x01:
-            name_table_addr = NAME_TABLE_1_START;
-            break;
-        case 0x02:
-            name_table_addr = NAME_TABLE_2_START;
-            break;
-        case 0x03:
-            name_table_addr = NAME_TABLE_3_START;
-            break;
-        default:
-            throw "name_table_bits is not in [0, 3]";
-            break;
+    uint8_t mirroring_type = CPU::getInstance()->control_one & 0x01;
+
+    // Bit 3 overrides bit 0 and implements 4 screen mirroring
+    if (CPU::getInstance()->control_one & 0x08){
+            switch (name_table_bits){
+                case 0x00:
+                    name_table_addr = NAME_TABLE_0_START;
+                    break;
+                case 0x01:
+                    name_table_addr = NAME_TABLE_1_START;
+                    break;
+                case 0x02:
+                    name_table_addr = NAME_TABLE_2_START;
+                    break;
+                case 0x03:
+                    name_table_addr = NAME_TABLE_3_START;
+                    break;
+                default:
+                    throw "name_table_bits is not in [0, 3]";
+                    break;
+            }
+            return name_table_addr;
+    }
+
+    // If bit 3 wasn't set, do horizontal or vertical mirroring
+    if(mirroring_type == 0x00){
+        // Horizontal Mirroring
+        switch (name_table_bits){
+            case 0x00:
+                name_table_addr = NAME_TABLE_0_START;
+                break;
+            case 0x01:
+                name_table_addr = NAME_TABLE_0_START;
+                break;
+            case 0x02:
+                name_table_addr = NAME_TABLE_1_START;
+                break;
+            case 0x03:
+                name_table_addr = NAME_TABLE_1_START;
+                break;
+            default:
+                throw "name_table_bits is not in [0, 3]";
+                break;
+        }
+    }
+    else{
+        // Vertical Mirroring
+        switch (name_table_bits){
+            case 0x00:
+                name_table_addr = NAME_TABLE_0_START;
+                break;
+            case 0x01:
+                name_table_addr = NAME_TABLE_1_START;
+                break;
+            case 0x02:
+                name_table_addr = NAME_TABLE_0_START;
+                break;
+            case 0x03:
+                name_table_addr = NAME_TABLE_1_START;
+                break;
+            default:
+                throw "name_table_bits is not in [0, 3]";
+                break;
+        }
     }
 
     return name_table_addr;
