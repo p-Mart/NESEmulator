@@ -139,10 +139,16 @@ void CPU::printRegisters(void){
 
 void CPU::runProgram(){
     uint8_t byte = *MMU::getInstance()->read(&PC);
-    int cycles = 0;
+    
     SDL_Event event;
     bool exit = false;
     while((byte != 0x00) && (!exit)){
+
+        // PPU tick
+        // 3 CPU Clocks = 1 PPU Clock
+        for (int i = 0; i < 3; i++){
+            PPU::getInstance()->tick(); 
+        }
 
         // Go through the SDL Event Stack
         while(SDL_PollEvent(&event)){
@@ -151,19 +157,18 @@ void CPU::runProgram(){
             }
         }
 
-        // Get byte and run as opcode
-        byte = *MMU::getInstance()->read(&PC);
-        opcodes[byte](); 
+        if(cycle_delay == 0){
+            // Get byte and run as opcode
+            byte = *MMU::getInstance()->read(&PC);
+            opcodes[byte](); 
 
-        // Increment PC by 1
-        PC = PC + 1;
-        cycles += 1;
-
-        // PPU tick
-        // 3 CPU Clocks = 1 PPU Clock
-        for (int i = 0; i < 3; i++){
-            PPU::getInstance()->tick(); 
+            // Increment PC
+            PC++;
+        }else{
+            cycle_delay--;
         }
+        // Update cycle parity (I don't bother counting cycles)
+        cycle_parity = (cycle_parity + 1) % 2;
     }
 
     #ifndef NDEBUG
@@ -290,4 +295,9 @@ void CPU::interruptNMI(){
     PC = 0;
     PC += *MMU::getInstance()->read(&nmi_lo);
     PC += *MMU::getInstance()->read(&nmi_hi) *  256;
+}
+
+void CPU::delay(unsigned int cycles){
+    // Stall the CPU for some number of cycles
+    cycle_delay += cycles;
 }

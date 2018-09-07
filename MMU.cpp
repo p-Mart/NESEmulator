@@ -145,9 +145,6 @@ void MMU::write(uint16_t *address, uint8_t *value){
             if(hardware_address == 0x2007){
                 std::cout << "PPU DATA write detected with value: " << +(*value) << std::endl;
             }
-            if(hardware_address == 0x4014){
-                std::cout << "OAM DMA write detected with value: " << +(*value) << std::endl;
-            }
         #endif
 
             // Redirect write into PPU
@@ -159,6 +156,13 @@ void MMU::write(uint16_t *address, uint8_t *value){
                 PPU::getInstance()->dataPort(value);
                 return;
             }
+    }
+
+    // OAM DMA write
+    if(hardware_address == OAMDMA){
+        // On odd cycles, the DMA transfer steals 513 cycles, otherwise it takes 514.
+        unsigned int delay = (CPU::getInstance()->cycle_parity == 0) ? 514 : 513;
+        CPU::getInstance()->delay(delay);
     }
 
     // APU I/O Writes

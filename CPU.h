@@ -50,6 +50,10 @@ public:
     uint8_t n_ram_banks;
     int mapper;
 
+    // Cycle related information
+    unsigned int cycle_delay; // Delay counter to emulate cycle stalling
+    uint8_t cycle_parity; // 0 = even, 1 = odd. arithmetic in mod 2
+
     static CPU* getInstance();
     void clearRegisters();
     uint8_t getStatusBit(uint8_t);
@@ -62,6 +66,7 @@ public:
     void loadProgram(std::string);
 
     void interruptNMI();
+    void delay(unsigned int);
 
     void pushStack(uint8_t*);
     void pushStack(uint16_t*);
