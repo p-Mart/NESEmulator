@@ -126,6 +126,10 @@ void PPU::write(uint8_t *address, uint8_t *value){
     memory[*address] = *value;
 }
 
+void PPU::writeOAM(uint16_t *address, uint8_t *value){
+  spr_ram[*address] = *value;  
+}
+
 void PPU::addrPort(uint8_t *value){
     // Address port needs 2 writes (hi then lo byte), at which point 
     // data is written on the PPU DATA line

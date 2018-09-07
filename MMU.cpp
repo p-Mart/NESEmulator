@@ -163,6 +163,7 @@ void MMU::write(uint16_t *address, uint8_t *value){
         // On odd cycles, the DMA transfer steals 513 cycles, otherwise it takes 514.
         unsigned int delay = (CPU::getInstance()->cycle_parity == 0) ? 514 : 513;
         CPU::getInstance()->delay(delay);
+        writeOAMDMA(value);
     }
 
     // APU I/O Writes
@@ -205,6 +206,15 @@ void MMU::writeStack(uint8_t *stack_pointer, uint8_t *value){
     address += STACK_START;
 
     write(&address, value);
+}
+
+// Write to PPU OAM through DMA
+void MMU::writeOAMDMA(uint8_t *value){
+    uint16_t address = (*value) * 256;
+    for(uint16_t oam_idx; oam_idx < 0x0100; oam_idx++){
+        PPU::getInstance()->writeOAM(&oam_idx, &memory[address]);
+        address++;
+    }
 }
 
 // Utility function to dump contents of memory

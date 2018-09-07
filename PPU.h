@@ -168,6 +168,7 @@ class PPU{
         uint8_t *read(uint8_t*);
         void write(uint16_t*, uint8_t*);
         void write(uint8_t*, uint8_t*);
+        void writeOAM(uint16_t*, uint8_t*);
         void addrPort(uint8_t*);
         void dataPort(uint8_t*);
         void statusRead();
